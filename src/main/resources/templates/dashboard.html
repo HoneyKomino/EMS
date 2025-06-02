@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+    <h2>Hoş geldin!</h2>
+    <p>Giriş başarılı. Dashboard'a ulaştın.</p>
+
+    <form th:action="@{/logout}" method="post">
+        <button type="submit">Çıkış Yap</button>
+    </form>
+</body>
+</html>
