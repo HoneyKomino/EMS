@@ -25,16 +25,16 @@ public class UserService {
 
 
     public void registerUser(User user) {
-        // Şifreyi hashle
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        // "ROLE_USER" rolünü getir
-       Role userRole = roleRepository.findByName("ROLE_USER")
-    .orElseThrow(() -> new RuntimeException("ROLE_USER bulunamadı."));
+        Role userRole = roleRepository.findByName("ROLE_USER")
+                .orElseThrow(() -> new RuntimeException("ROLE_USER bulunamadı."));
 
-        user.setRoles(Collections.singleton(userRole));
+        // JPA'nın düzgün ilişkilendirme yapması için Role objesini attach et
+        Role attachedRole = roleRepository.getReferenceById(userRole.getId());
 
-        // Kullanıcıyı veritabanına kaydet
+        user.setRoles(Collections.singleton(attachedRole));
         userRepository.save(user);
     }
+
 }
