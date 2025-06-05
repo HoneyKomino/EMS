@@ -17,12 +17,11 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-   public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
-    this.userRepository = userRepository;
-    this.roleRepository = roleRepository;
-    this.passwordEncoder = passwordEncoder;
-}
-
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public void registerUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -30,11 +29,13 @@ public class UserService {
         Role userRole = roleRepository.findByName("ROLE_USER")
                 .orElseThrow(() -> new RuntimeException("ROLE_USER bulunamadı."));
 
-        // JPA'nın düzgün ilişkilendirme yapması için Role objesini attach et
         Role attachedRole = roleRepository.getReferenceById(userRole.getId());
 
         user.setRoles(Collections.singleton(attachedRole));
         userRepository.save(user);
     }
 
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
 }

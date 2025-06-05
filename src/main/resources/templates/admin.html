@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Panel</title>
+</head>
+<body>
+<h2>Yönetici Paneli</h2>
+<p>Bu sayfa sadece ROLE_ADMIN kullanıcıları tarafından görülebilir.</p>
+
+<form th:action="@{/logout}" method="post">
+    <button type="submit">Çıkış Yap</button>
+</form>
+</body>
+</html>

@@ -2,19 +2,50 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Kayıt Ol</title>
+    <meta charset="UTF-8" />
 </head>
 <body>
-    <h2>Kayıt Ol</h2>
-    <form th:action="@{/register}" method="post">
-        <label>Kullanıcı Adı:</label>
-        <input type="text" name="username" required/><br/>
 
-        <label>Şifre:</label>
-        <input type="password" name="password" required/><br/>
+<h2>Kayıt Formu</h2>
 
-        <button type="submit">Kayıt Ol</button>
-    </form>
+<form th:action="@{/register}" th:object="${user}" method="post">
 
-    <p><a th:href="@{/login}">Zaten hesabın var mı? Giriş yap</a></p>
+    <!-- Kullanıcı adı alanı -->
+    <div>
+        <label for="username">Kullanıcı Adı:</label>
+        <input type="text" id="username" th:field="*{username}" />
+        <div th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+    </div>
+
+    <!-- Şifre alanı -->
+    <div>
+        <label for="password">Şifre:</label>
+        <input type="password" id="password" th:field="*{password}" />
+        <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+    </div>
+
+    <!-- Şifre tekrar alanı -->
+    <div>
+        <label for="confirmPassword">Şifre Tekrar:</label>
+        <input type="password" id="confirmPassword" th:field="*{confirmPassword}" />
+        <div th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
+    </div>
+
+    <!-- Sınıf düzeyindeki (global) hatalar: örneğin şifreler uyuşmuyor -->
+    <div th:if="${#fields.hasGlobalErrors()}">
+        <p th:each="err : ${#fields.globalErrors()}" th:text="${err}" style="color:red;"></p>
+    </div>
+
+
+
+    <br/>
+    <button type="submit">Kayıt Ol</button>
+</form>
+
+<p>
+    Zaten hesabınız var mı?
+    <a th:href="@{/login}">Giriş Yap</a>
+</p>
+
 </body>
 </html>
