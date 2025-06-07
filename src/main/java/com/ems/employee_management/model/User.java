@@ -1,16 +1,15 @@
 package com.ems.employee_management.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import validation.PasswordMatches;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "users")
-
 public class User {
 
     @Id
@@ -29,6 +28,10 @@ public class User {
     @NotBlank(message = "Şifre tekrarı boş olamaz")
     private String confirmPassword;
 
+    @Email(message = "Geçerli bir e-posta adresi giriniz")
+    @NotBlank(message = "Email boş olamaz")
+    private String email;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
@@ -37,7 +40,8 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
-    // --- Getter ve Setter'lar ---
+    @Column(name = "is_super_admin", nullable = false)
+    private boolean isSuperAdmin = false;
 
     public Long getId() {
         return id;
@@ -71,11 +75,27 @@ public class User {
         this.confirmPassword = confirmPassword;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public Set<Role> getRoles() {
         return roles;
     }
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public boolean isSuperAdmin() {
+        return isSuperAdmin;
+    }
+
+    public void setSuperAdmin(boolean superAdmin) {
+        isSuperAdmin = superAdmin;
     }
 }

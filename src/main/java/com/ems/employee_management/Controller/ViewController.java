@@ -36,11 +36,7 @@ public class ViewController {
         return "dashboard";
     }
 
-    @GetMapping("/register")
-    public String registerPage(Model model) {
-        model.addAttribute("user", new User());
-        return "register";
-    }
+
 
     @GetMapping("/admin")
     public String adminPage() {

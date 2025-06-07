@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -18,33 +19,40 @@ public class AuthController {
         this.userService = userService;
     }
 
+    // ✅ Kayıt formunu göstermek için GET endpoint'i
+    @GetMapping("/register")
+    public String showRegisterForm(Model model) {
+        model.addAttribute("user", new User());
+        return "register";
+    }
+
+    // ✅ Kayıt işlemini gerçekleştiren POST endpoint
     @PostMapping("/register")
     public String registerUser(@Valid @ModelAttribute("user") User user,
                                BindingResult bindingResult,
                                Model model) {
 
-        // 🔐 Şifre eşleşme kontrolü burada manuel yapılmalı
+        // 🔐 Şifre eşleşme kontrolü
         if (!user.getPassword().equals(user.getConfirmPassword())) {
             bindingResult.reject("password.mismatch", "Şifreler uyuşmuyor");
         }
 
-        // 👤 Kullanıcı adı veritabanında var mı kontrol
+        // 👤 Kullanıcı adı zaten var mı kontrolü
         if (!bindingResult.hasFieldErrors("username")) {
             if (userService.existsByUsername(user.getUsername())) {
                 bindingResult.rejectValue("username", null, "Bu kullanıcı adı zaten mevcut");
             }
         }
 
-        // ❌ Hatalıysa formu tekrar göster
+        // ❌ Validasyon hatası varsa form tekrar gösterilsin
         if (bindingResult.hasErrors()) {
-            System.out.println("❌ Kayıt formunda hata var, form tekrar gösteriliyor.");
+            bindingResult.getAllErrors().forEach(error -> System.out.println("⚠️ Hata: " + error));
             return "register";
         }
 
-        // ✅ Kullanıcıyı kayıt et
+        // ✅ Kullanıcıyı kaydet
         userService.registerUser(user);
-
-        System.out.println("✅ Kullanıcı kayıt edildi, login sayfasına yönlendiriliyor: /login?registered=true");
+        System.out.println("✅ Kullanıcı kayıt edildi, login sayfasına yönlendiriliyor.");
 
         return "redirect:/login?registered=true";
     }
