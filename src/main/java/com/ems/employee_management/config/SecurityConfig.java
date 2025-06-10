@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import java.io.IOException;
 
@@ -32,15 +33,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // ✅ CSRF token destekli
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/register", "/css/**", "/js/**").permitAll()
                         .requestMatchers("/admin/**", "/admin/users/**").hasRole("ADMIN")
-                        .requestMatchers("/manager/**", "/manager/users/**").hasRole("MANAGER")  // 👈 EKLENDİ
-                        .requestMatchers("/dashboard", "/user/**").authenticated()
+                        .requestMatchers("/manager/**", "/manager/users/**").hasRole("MANAGER")
+                        .requestMatchers("/user/**").authenticated()
                         .anyRequest().denyAll()
                 )
-
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
@@ -77,7 +79,7 @@ public class SecurityConfig {
                 } else if (isManager) {
                     response.sendRedirect("/manager");
                 } else {
-                    response.sendRedirect("/dashboard");
+                    response.sendRedirect("/user"); // fallback sayfa
                 }
             }
         };

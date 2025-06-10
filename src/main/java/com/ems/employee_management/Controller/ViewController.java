@@ -31,10 +31,6 @@ public class ViewController {
         return "login";
     }
 
-    @GetMapping("/dashboard")
-    public String dashboardPage() {
-        return "dashboard";
-    }
 
 
 
