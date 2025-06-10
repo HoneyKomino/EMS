@@ -11,14 +11,13 @@
   <div class="card shadow p-4">
     <h2 class="mb-4">➕ Yeni Kullanıcı Oluştur</h2>
 
-    <!-- ✅ Hataları göster -->
-    <div th:if="${#fields.hasErrors()}" class="alert alert-danger">
-      Lütfen formdaki hataları düzeltin.
-    </div>
-
     <!-- ✅ Dinamik olarak admin veya manager create endpoint'ine yönlendir -->
-    <form th:action="@{${#request.requestURI.contains('manager') ? '/manager/users/create' : '/admin/users/create'}}"
-          th:object="${user}" method="post">
+    <form th:action="@{${formAction}}" th:object="${user}" method="post">
+
+      <!-- ✅ Hataları göster -->
+      <div th:if="${#fields.hasErrors()}" class="alert alert-danger">
+        Lütfen formdaki hataları düzeltin.
+      </div>
 
       <div class="mb-3">
         <label class="form-label">Kullanıcı Adı</label>
@@ -62,8 +61,7 @@
 
       <!-- ✅ Dinamik geri dön butonu -->
       <div class="d-flex justify-content-between">
-        <a th:href="@{${#request.requestURI.contains('manager') ? '/manager/users' : '/admin/users'}}"
-           class="btn btn-secondary">← Geri</a>
+        <a th:href="@{${backUrl}}" class="btn btn-secondary">← Geri</a>
         <button type="submit" class="btn btn-primary">Oluştur</button>
       </div>
     </form>

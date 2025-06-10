@@ -4,6 +4,7 @@ import com.ems.employee_management.model.User;
 import com.ems.employee_management.repository.RoleRepository;
 import com.ems.employee_management.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -80,7 +81,8 @@ public class AdminController {
     @GetMapping("/create")
     public String showCreateUserForm(Model model) {
         model.addAttribute("user", new User());
-        model.addAttribute("allRoles", roleRepository.findAll());
+        model.addAttribute("formAction", "/admin/users/create");  // 👈 change this depending on context
+        model.addAttribute("backUrl", "/admin/users");            // 👈 add this for the back button
         return "create-user";
     }
 
