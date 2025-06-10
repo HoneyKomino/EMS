@@ -43,6 +43,13 @@ public class User {
     @Column(name = "is_super_admin", nullable = false)
     private boolean isSuperAdmin = false;
 
+    // ✅ Departman ilişkisi eklendi
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private Department department;
+
+    // --- Getter & Setter'lar ---
+
     public Long getId() {
         return id;
     }
@@ -97,5 +104,13 @@ public class User {
 
     public void setSuperAdmin(boolean superAdmin) {
         isSuperAdmin = superAdmin;
+    }
+
+    public Department getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
     }
 }

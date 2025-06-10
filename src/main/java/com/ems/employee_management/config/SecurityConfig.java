@@ -35,14 +35,16 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/register", "/css/**", "/js/**").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")         // Admin paneli
-                        .requestMatchers("/dashboard", "/user/**").authenticated() // Giriş yapan herkes görebilir
+                        .requestMatchers("/admin/**", "/admin/users/**").hasRole("ADMIN")
+                        .requestMatchers("/manager/**", "/manager/users/**").hasRole("MANAGER")  // 👈 EKLENDİ
+                        .requestMatchers("/dashboard", "/user/**").authenticated()
                         .anyRequest().denyAll()
                 )
+
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
-                        .successHandler(roleBasedRedirectHandler()) // Dinamik yönlendirme
+                        .successHandler(roleBasedRedirectHandler())
                         .permitAll()
                 )
                 .logout(logout -> logout
@@ -62,13 +64,20 @@ public class SecurityConfig {
                                                 HttpServletResponse response,
                                                 Authentication authentication)
                     throws IOException, ServletException {
+                System.out.println("🔐 Login Başarılı → Roller: " + authentication.getAuthorities());
+
                 boolean isAdmin = authentication.getAuthorities().stream()
                         .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
 
+                boolean isManager = authentication.getAuthorities().stream()
+                        .anyMatch(auth -> auth.getAuthority().equals("ROLE_MANAGER"));
+
                 if (isAdmin) {
-                    response.sendRedirect("/admin"); // örnek: admin paneli ana sayfası
+                    response.sendRedirect("/admin");
+                } else if (isManager) {
+                    response.sendRedirect("/manager");
                 } else {
-                    response.sendRedirect("/dashboard"); // normal kullanıcılar
+                    response.sendRedirect("/dashboard");
                 }
             }
         };

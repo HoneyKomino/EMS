@@ -1,10 +1,9 @@
 package com.ems.employee_management.service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,23 +25,9 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // ✅ İlk kullanıcı admin ve superadmin, diğerleri user
-    public void registerUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        if (userRepository.count() == 0) {
-            Role adminRole = roleRepository.findByName("ROLE_ADMIN")
-                    .orElseThrow(() -> new RuntimeException("ROLE_ADMIN bulunamadı."));
-            user.setRoles(Collections.singleton(adminRole));
-            user.setSuperAdmin(true);
-        } else {
-            Role userRole = roleRepository.findByName("ROLE_USER")
-                    .orElseThrow(() -> new RuntimeException("ROLE_USER bulunamadı."));
-            user.setRoles(Collections.singleton(userRole));
-            user.setSuperAdmin(false);
-        }
-
-        userRepository.save(user);
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Kullanıcı bulunamadı: " + username));
     }
 
     public boolean existsByUsername(String username) {
@@ -57,34 +42,9 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
-    public void updateUser(User user) {
-        if (user.getId() != null) {
-            User existingUser = userRepository.findById(user.getId()).orElse(null);
-
-            if (existingUser != null && existingUser.isSuperAdmin()) {
-                // Super admin'in rollerini ve flag'ini değiştirme
-                user.setSuperAdmin(true);
-                user.setRoles(existingUser.getRoles());
-            }
-
-            if (existingUser != null && (user.getPassword() == null || user.getPassword().isEmpty())) {
-                user.setPassword(existingUser.getPassword());
-            } else {
-                user.setPassword(passwordEncoder.encode(user.getPassword()));
-            }
-        }
-
-        Set<Role> attachedRoles = user.getRoles().stream()
-                .map(role -> roleRepository.findById(role.getId())
-                        .orElseThrow(() -> new RuntimeException("Rol bulunamadı: " + role.getId())))
-                .collect(Collectors.toSet());
-
-        user.setRoles(attachedRoles);
-        userRepository.save(user);
-    }
-
     public void deleteUserById(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı."));
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı."));
         if (user.isSuperAdmin()) {
             throw new RuntimeException("Ana admin silinemez.");
         }
@@ -95,21 +55,60 @@ public class UserService {
         return userRepository.findAllAdmins();
     }
 
-    // ✅ Bir kullanıcıya rol atar (örneğin admin yapmak için)
+    public List<User> findUsersByManagerUsername(String username) {
+        User manager = findByUsername(username);
+        if (manager.getDepartment() == null) {
+            return List.of();
+        }
+        return userRepository.findByDepartmentId(manager.getDepartment().getId());
+    }
+
+    // ✅ Yeni kullanıcı kaydı
+    public void registerUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user); // ID oluşması için önce kaydedilir
+
+        Set<Role> roleSet = new HashSet<>();
+        if (user.isSuperAdmin()) {
+            Role adminRole = roleRepository.findByName("ROLE_ADMIN")
+                    .orElseThrow(() -> new RuntimeException("ROLE_ADMIN bulunamadı."));
+            roleSet.add(adminRole);
+        } else {
+            Role role = roleRepository.findByName("ROLE_USER")
+                    .orElseThrow(() -> new RuntimeException("ROLE_USER bulunamadı."));
+            roleSet.add(role);
+        }
+
+        user.setRoles(roleSet);
+        userRepository.save(user); // rollerle tekrar kaydet
+    }
+
     public void assignRole(Long userId, String roleName) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı."));
-
-        if (user.isSuperAdmin()) {
-            throw new RuntimeException("Ana admin'in rolü değiştirilemez.");
-        }
-
         Role role = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new RuntimeException("Rol bulunamadı."));
+                .orElseThrow(() -> new RuntimeException("Rol bulunamadı: " + roleName));
+        user.getRoles().add(role);
+        userRepository.save(user);
+    }
 
-        if (!user.getRoles().contains(role)) {
-            user.getRoles().add(role);
-            userRepository.save(user);
+    public void updateUserWithRoles(User user, List<String> selectedRoleNames) {
+        User existingUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı."));
+
+        if (user.getPassword() == null || user.getPassword().isBlank()) {
+            user.setPassword(existingUser.getPassword());
+        } else {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
+
+        Set<Role> updatedRoles = selectedRoleNames.stream()
+                .map(roleName -> roleRepository.findByName(roleName)
+                        .orElseThrow(() -> new RuntimeException("Rol bulunamadı: " + roleName)))
+                .collect(Collectors.toSet());
+
+        user.setRoles(new HashSet<>(updatedRoles)); // 🔧 Hata burada da olabilir
+        user.setSuperAdmin(user.isSuperAdmin());
+        userRepository.save(user);
     }
 }

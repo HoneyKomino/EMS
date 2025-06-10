@@ -9,8 +9,9 @@ public class Department {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long departmentId;
+    private Long id; // ✅ önce departmentId idi, şimdi id olarak düzeltildi
 
+    @Column(nullable = false)
     private String departmentName;
 
     @OneToOne
@@ -22,12 +23,12 @@ public class Department {
 
     // --- Getter & Setter ---
 
-    public Long getDepartmentId() {
-        return departmentId;
+    public Long getId() {
+        return id;
     }
 
-    public void setDepartmentId(Long departmentId) {
-        this.departmentId = departmentId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getDepartmentName() {
