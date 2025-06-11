@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -48,11 +49,16 @@ public class ManagerController {
 
     /** 📋 Çalışanlarım (view‑only) */
     @GetMapping
-    public String employees(@AuthenticationPrincipal UserDetails p, Model m) {
-        Long deptId = managerService.getDepartmentIdByUser(
-                userService.findByUsername(p.getUsername()));
+    public String employees(@AuthenticationPrincipal UserDetails p,
+                            @RequestParam(required = false) String keyword,
+                            Model m) {
+
+        User me = userService.findByUsername(p.getUsername());
+        Long deptId = managerService.getDepartmentIdByUser(me);
+
         m.addAttribute("employees",
-                employeeService.findEmployeesByDepartmentId(deptId));
+                employeeService.findByDepartmentAndKeyword(deptId, keyword));
+        m.addAttribute("keyword", keyword);      // keep value in the search box
         return "manager-employee-list";
     }
 
@@ -83,6 +89,46 @@ public class ManagerController {
                 userService.findByUsername(p.getUsername()));
         m.addAttribute("stats", reportService.stats(deptId));
         return "manager-reports";
+    }
+
+    @GetMapping("/employees/{empId}/edit-job")
+    public String showJobForm(@PathVariable Long empId,
+                              @AuthenticationPrincipal UserDetails p,
+                              Model model) {
+
+        User me      = userService.findByUsername(p.getUsername());
+        Long deptId  = managerService.getDepartmentIdByUser(me);
+        Employee emp = employeeService.findById(empId)
+                .orElseThrow(() -> new RuntimeException("Çalışan bulunamadı"));
+
+        // güvenlik: başka departmana ait ise engelle
+        if (!emp.getDepartment().getId().equals(deptId)) {
+            return "redirect:/manager";
+        }
+
+        model.addAttribute("employee", emp);
+        model.addAttribute("jobs",    employeeService.findAllJobs()); // simple helper
+        return "manager-assign-job";
+    }
+
+    @PostMapping("/employees/{empId}/edit-job")
+    public String saveJob(@PathVariable Long empId,
+                          @RequestParam Long jobId,
+                          @AuthenticationPrincipal UserDetails p,
+                          RedirectAttributes ra) {
+
+        User me      = userService.findByUsername(p.getUsername());
+        Long deptId  = managerService.getDepartmentIdByUser(me);
+        Employee emp = employeeService.findById(empId)
+                .orElseThrow(() -> new RuntimeException("Çalışan bulunamadı"));
+
+        if (!emp.getDepartment().getId().equals(deptId)) {
+            return "redirect:/manager";
+        }
+
+        employeeService.assignJob(empId, jobId);  // simple update
+        ra.addFlashAttribute("success", "Pozisyon güncellendi.");
+        return "redirect:/manager";
     }
 
 }

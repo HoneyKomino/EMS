@@ -16,17 +16,42 @@
 </head>
 <body>
 
-<!-- ▸ Navbar ------------------------------------------------------------ -->
+<!-- ▸ Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
   <div class="container">
     <a class="navbar-brand fw-semibold" href="/manager">
       <i class="bi bi-people-fill me-2"></i>Çalışanlarım
     </a>
-    <a class="btn btn-sm btn-light d-lg-none" href="/manager"><i class="bi bi-house"></i></a>
+    <a class="btn btn-sm btn-light d-lg-none" href="/manager">
+      <i class="bi bi-house"></i>
+    </a>
   </div>
 </nav>
 
 <div class="container py-5">
+
+  <!-- search + quick nav -->
+  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-4">
+
+    <!-- search form -->
+    <form class="d-flex" th:action="@{/manager}" method="get" role="search">
+      <input class="form-control me-2" type="search" name="keyword"
+             placeholder="İsim veya e‑posta…" th:value="${keyword}">
+      <button class="btn btn-outline-primary" type="submit">
+        <i class="bi bi-search"></i>
+      </button>
+    </form>
+
+    <!-- quick nav buttons -->
+    <div class="btn-group mt-2 mt-sm-0">
+      <a href="/manager/timeoff" class="btn btn-warning">
+        <i class="bi bi-calendar-check"></i> İzin İstekleri
+      </a>
+      <a href="/manager/reports" class="btn btn-info text-white">
+        <i class="bi bi-graph-up"></i> Raporlar
+      </a>
+    </div>
+  </div>
 
   <!-- employee list card -->
   <div class="card border-0 shadow-sm">
@@ -46,7 +71,10 @@
             <td th:text="${stat.index + 1}"></td>
             <td th:text="${emp.firstName + ' ' + emp.lastName}"></td>
             <td class="d-none d-md-table-cell" th:text="${emp.email}"></td>
-            <td th:text="${emp.job != null ? emp.job.jobsTitle : 'Yok'}"></td>
+            <td>
+              <a th:href="@{|/manager/employees/${emp.employeeId}/edit-job|}"
+                 th:text="${emp.job != null ? emp.job.jobsTitle : 'Pozisyon Ata'}"></a>
+            </td>
           </tr>
 
           <tr th:if="${employees.size()} == 0">
@@ -60,18 +88,8 @@
     </div>
   </div>
 
-  <!-- quick nav -->
-  <div class="btn-group mt-4">
-    <a href="/manager/timeoff"  class="btn btn-warning">
-      <i class="bi bi-calendar-check"></i> İzin İstekleri
-    </a>
-    <a href="/manager/reports"  class="btn btn-info text-white">
-      <i class="bi bi-graph-up"></i> Raporlar
-    </a>
-  </div>
-
   <!-- logout -->
-  <form th:action="@{/logout}" method="post" class="d-inline ms-2">
+  <form th:action="@{/logout}" method="post" class="d-inline mt-4">
     <button class="btn btn-danger">
       <i class="bi bi-box-arrow-right"></i> Çıkış Yap
     </button>
