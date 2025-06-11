@@ -2,6 +2,9 @@ package com.ems.employee_management.model;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "employees")
 public class Employee {
@@ -9,6 +12,14 @@ public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long employeeId;
+
+    public BigDecimal getSalary() {
+        return salary;
+    }
+
+    public void setSalary(BigDecimal salary) {
+        this.salary = salary;
+    }
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -25,6 +36,10 @@ public class Employee {
     private String firstName;
     private String lastName;
     private String email;
+    @Column(precision = 10, scale = 2)
+    private BigDecimal salary;   // nullable ⇒ optional
+
+    private LocalDate hireDate;  // for tenure chart later
 
     // --- GETTER & SETTER ---
 

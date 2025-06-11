@@ -6,6 +6,7 @@ import com.ems.employee_management.model.User;
 import com.ems.employee_management.repository.DepartmentRepository;
 import com.ems.employee_management.repository.EmployeeRepository;
 import com.ems.employee_management.repository.RoleRepository;
+import com.ems.employee_management.service.ManagerService;
 import com.ems.employee_management.service.UserService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -27,12 +28,14 @@ public class AdminController {
     private final RoleRepository roleRepository;
     private final DepartmentRepository departmentRepository;
     private EmployeeRepository employeeRepository;
+    private final ManagerService managerService;
 
-    public AdminController(UserService userService, RoleRepository roleRepository, DepartmentRepository departmentRepository, EmployeeRepository employeeRepository) {
+    public AdminController(UserService userService, RoleRepository roleRepository, DepartmentRepository departmentRepository, EmployeeRepository employeeRepository, ManagerService managerService) {
         this.userService = userService;
         this.roleRepository = roleRepository;
         this.departmentRepository = departmentRepository;
         this.employeeRepository = employeeRepository;
+        this.managerService = managerService;
     }
 
     @GetMapping
@@ -157,6 +160,11 @@ public class AdminController {
         manager.setDepartment(department);
         userService.updateUser(manager);
 
+        Employee emp = employeeRepository.findByUser(manager);
+        if (emp != null) {
+            managerService.linkManager(emp, department);   // upsert row
+        }
+
         redirectAttributes.addFlashAttribute("success", "Yönetici başarıyla atandı.");
         return "redirect:/admin/users";
     }
@@ -181,6 +189,11 @@ public class AdminController {
 
         /* 3.  Persist user */
         userService.updateUser(manager);
+
+        Employee emp = employeeRepository.findByUser(manager);
+        if (emp != null) {
+            managerService.unlinkManager(emp);             // hard‑delete row
+        }
 
         redirect.addFlashAttribute("success", "Yönetici rolü kaldırıldı.");
         return "redirect:/admin/users";

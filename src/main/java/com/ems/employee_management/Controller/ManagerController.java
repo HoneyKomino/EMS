@@ -1,10 +1,9 @@
 package com.ems.employee_management.controller;
 
+import com.ems.employee_management.model.TimeOffRequest;
 import com.ems.employee_management.model.User;
 import com.ems.employee_management.model.Employee;
-import com.ems.employee_management.service.EmployeeService;
-import com.ems.employee_management.service.ManagerService;
-import com.ems.employee_management.service.UserService;
+import com.ems.employee_management.service.*;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,68 +20,69 @@ public class ManagerController {
 
     private final ManagerService managerService;
     private final EmployeeService employeeService;
-    private final UserService userService;
+    private final TimeOffService timeOffService;
+    private final ReportService reportService;
+    private final UserService     userService;
 
     public ManagerController(ManagerService managerService,
-                             EmployeeService employeeService,
+                             EmployeeService employeeService, TimeOffService timeOffService, ReportService reportService,
                              UserService userService) {
         this.managerService = managerService;
         this.employeeService = employeeService;
+        this.timeOffService = timeOffService;
+        this.reportService = reportService;
         this.userService = userService;
     }
 
-    // 🟡 Dashboard → kendi departmanındaki çalışanları göster
+//    // 🟡 Dashboard → kendi departmanındaki çalışanları göster
+//    // Dashboard – employees in my department
+//    @GetMapping
+//    public String viewMyDepartmentEmployees(@AuthenticationPrincipal UserDetails principal,
+//                                            Model model) {
+//        User me = userService.findByUsername(principal.getUsername());
+//        Long deptId = managerService.getDepartmentIdByUser(me);
+//        List<Employee> emps = employeeService.findEmployeesByDepartmentId(deptId);
+//        model.addAttribute("employees", emps);
+//        return "manager-employee-list";   // <── NEW TEMPLATE NAME
+//    }
+
+    /** 📋 Çalışanlarım (view‑only) */
     @GetMapping
-    public String viewMyDepartmentEmployees(@AuthenticationPrincipal UserDetails userDetails,
-                                            Model model) {
-        User user = userService.findByUsername(userDetails.getUsername());
-        Long departmentId = managerService.getDepartmentIdByUser(user);
-        List<Employee> employees = employeeService.findEmployeesByDepartmentId(departmentId);
-        model.addAttribute("employees", employees);
-        return "manager-dashboard";
+    public String employees(@AuthenticationPrincipal UserDetails p, Model m) {
+        Long deptId = managerService.getDepartmentIdByUser(
+                userService.findByUsername(p.getUsername()));
+        m.addAttribute("employees",
+                employeeService.findEmployeesByDepartmentId(deptId));
+        return "manager-employee-list";
     }
 
-    // 🟡 Kendi departmanındaki kullanıcıları listele
-    @GetMapping("/users")
-    public String viewMyDepartmentUsers(@AuthenticationPrincipal UserDetails userDetails,
-                                        Model model) {
-        String username = userDetails.getUsername();
-        List<User> departmentUsers = userService.findUsersByManagerUsername(username);
-        model.addAttribute("users", departmentUsers);
-        return "user-list";
+    /** 📅 İzin İstekleri */
+    @GetMapping("/timeoff")
+    public String timeOff(@AuthenticationPrincipal UserDetails p, Model m) {
+        Long deptId = managerService.getDepartmentIdByUser(
+                userService.findByUsername(p.getUsername()));
+        m.addAttribute("requests", timeOffService.deptRequests(deptId));
+        return "manager-timeoff-list";
     }
 
-    // 🟢 Yeni kullanıcı formu
-    @GetMapping("/users/create")
-    public String showCreateUserForm(Model model) {
-        model.addAttribute("user", new User());
-        return "create-user";
+    @PostMapping("/timeoff/{id}/approve")
+    public String approve(@PathVariable Long id) {
+        timeOffService.changeStatus(id, TimeOffRequest.Status.APPROVED);
+        return "redirect:/manager/timeoff";
+    }
+    @PostMapping("/timeoff/{id}/reject")
+    public String reject(@PathVariable Long id) {
+        timeOffService.changeStatus(id, TimeOffRequest.Status.REJECTED);
+        return "redirect:/manager/timeoff";
     }
 
-    // 🟢 Kullanıcı oluşturma işlemi
-    @PostMapping("/users/create")
-    public String createUser(@AuthenticationPrincipal UserDetails userDetails,
-                             @ModelAttribute("user") @Valid User user,
-                             BindingResult bindingResult,
-                             Model model) {
-        User manager = userService.findByUsername(userDetails.getUsername());
-
-        if (bindingResult.hasErrors()) {
-            return "create-user";
-        }
-
-        if (!user.getPassword().equals(user.getConfirmPassword())) {
-            bindingResult.rejectValue("confirmPassword", null, "Şifreler uyuşmuyor");
-            return "create-user";
-        }
-
-        if (manager.getDepartment() == null) {
-            model.addAttribute("error", "Departmanınız tanımlı değil. Kullanıcı ekleyemezsiniz.");
-            return "create-user";
-        }
-
-        user.setDepartment(manager.getDepartment());
-        userService.registerUser(user); // zaten default olarak USER rolü atanıyor
-        return "redirect:/manager/users";
+    /** 📊 Raporlar */
+    @GetMapping("/reports")
+    public String reports(@AuthenticationPrincipal UserDetails p, Model m) {
+        Long deptId = managerService.getDepartmentIdByUser(
+                userService.findByUsername(p.getUsername()));
+        m.addAttribute("stats", reportService.stats(deptId));
+        return "manager-reports";
     }
+
 }
