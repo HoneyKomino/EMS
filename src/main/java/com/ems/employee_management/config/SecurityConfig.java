@@ -32,10 +32,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/login", "/register", "/css/**", "/js/**").permitAll()
-                        .requestMatchers("/admin/**", "/admin/users/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/manager/**", "/manager/users/**").hasRole("MANAGER")  // 👈 EKLENDİ
                         .requestMatchers("/dashboard", "/user/**").authenticated()
                         .anyRequest().denyAll()

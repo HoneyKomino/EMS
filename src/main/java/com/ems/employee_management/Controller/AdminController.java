@@ -4,6 +4,7 @@ import com.ems.employee_management.model.User;
 import com.ems.employee_management.repository.RoleRepository;
 import com.ems.employee_management.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,7 +28,8 @@ public class AdminController {
     @GetMapping
     public String listUsers(Model model) {
         model.addAttribute("users", userService.findAllUsers());
-        return "user-list";
+        model.addAttribute("makeManagerUrlPrefix", "/admin/users/make-manager/"); // ✅ Add this
+        return "user-list"; // your HTML page name
     }
 
     @GetMapping("/edit/{id}")
@@ -72,8 +74,13 @@ public class AdminController {
         return "redirect:/admin/users";
     }
 
-    @PostMapping("/make-manager/{id}")
+    @GetMapping("/make-manager/{id}")
     public String makeManager(@PathVariable Long id) {
+        System.out.println("▶▶  makeManager() reached for userId = " + id);
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("✅ Current user: " + auth.getName());
+        System.out.println("🔐 Roles: " + auth.getAuthorities());
+
         userService.assignRole(id, "ROLE_MANAGER");
         return "redirect:/admin/users";
     }

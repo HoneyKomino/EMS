@@ -37,9 +37,10 @@
                     </form>
 
                     <!-- ✅ Yeni: Manager Yap butonu -->
-                    <form th:action="@{'/admin/users/make-manager/' + ${user.id}}" method="post" class="d-inline ms-1">
-                        <button type="submit" class="btn btn-sm btn-outline-primary">👔 Manager Yap</button>
-                    </form>
+                    <a th:href="@{'/admin/users/make-manager/' + ${user.id}}"
+                       class="btn btn-sm btn-outline-primary">
+                        Make&nbsp;Manager
+                    </a>
                 </td>
             </tr>
             </tbody>

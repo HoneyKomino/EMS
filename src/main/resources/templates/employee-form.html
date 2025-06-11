@@ -33,7 +33,7 @@
 <label class="form-label">Departman</label>
 <select class="form-select" th:field="*{department}">
 <option value="">-- Seçiniz --</option>
-<option th:each="d : ${departments}" th:selected="${d.departmentId == employee.department?.departmentId}" th:text="${d.departmentName}" th:value="${d.departmentId}"></option>
+<option th:each="d : ${departments}" th:selected="${d.id == employee.department?.departmentId}" th:text="${d.departmentName}" th:value="${d.id}"></option>
 </select>
 </div>
 <div class="col-md-6">
