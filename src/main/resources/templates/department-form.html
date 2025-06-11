@@ -7,28 +7,29 @@
     <link rel="stylesheet" th:href="@{/style.css}"/>
 </head>
 <body class="container mt-4">
-<h2 class="mb-4">Yeni Departman Ekle</h2>
+<h2 class="mb-4" th:text="${department.id != null} ? 'Departman Düzenle' : 'Yeni Departman Ekle'">Departman</h2>
 
 <form class="row g-3" method="post" th:action="@{/admin/departments/save}" th:object="${department}">
 
-    <!-- Departman Adı -->
+    <input type="hidden" th:field="*{id}" />
+
     <div class="col-md-6">
         <label class="form-label">Departman Adı:</label>
         <input class="form-control" required th:field="*{departmentName}" type="text"/>
     </div>
 
-    <!-- Yöneticiyi Seç -->
     <div class="col-md-6">
         <label class="form-label">Yönetici Seç:</label>
         <select class="form-select" name="managerId">
             <option value="">-- Seçiniz --</option>
             <option th:each="m : ${managers}"
                     th:value="${m.id}"
-                    th:text="${m.username}"></option>
+                    th:text="${m.username}"
+                    th:selected="${department.manager != null and m.id == department.manager.id}">
+            </option>
         </select>
     </div>
 
-    <!-- Kaydet ve İptal Butonları -->
     <div class="col-12 mt-3">
         <button class="btn btn-success" type="submit">Kaydet</button>
         <a class="btn btn-secondary" href="/admin/departments">İptal</a>

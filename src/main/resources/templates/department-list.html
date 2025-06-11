@@ -8,24 +8,33 @@
 <link rel="stylesheet" th:href="@{/style.css}"/></head>
 <body class="container mt-4">
 <h2 class="mb-4">Departman Listesi</h2>
+<div th:if="${param.error == 'alreadyAssigned'}" class="alert alert-danger">
+    Seçilen yönetici zaten başka bir departmana atanmış.
+</div>
 <a class="btn btn-primary mb-3" href="/admin/departments/new">+ Yeni Departman Ekle</a>
 <table class="table table-bordered table-striped">
-<thead class="table-dark">
-<tr>
-<th>ID</th>
-<th>Departman Adı</th>
-<th>İşlemler</th>
-</tr>
-</thead>
-<tbody>
-<tr th:each="d : ${departments}">
-<td th:text="${d.id}"></td>
-<td th:text="${d.departmentName}"></td>
-<td>
-<a class="btn btn-sm btn-danger" onclick="return confirm('Bu departmanı silmek istediğinize emin misiniz?')" th:href="@{'/admin/departments/delete/' + ${d.id}}">Sil</a>
-</td>
-</tr>
-</tbody>
+    <thead class="table-dark">
+    <tr>
+        <th>ID</th>
+        <th>Departman Adı</th>
+        <th>Yönetici</th>
+        <th>İşlemler</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="d : ${departments}">
+        <td th:text="${d.id}"></td>
+        <td th:text="${d.departmentName}"></td>
+        <td th:text="${d.manager != null ? d.manager.username : 'Yok'}"></td>
+        <td>
+            <a class="btn btn-sm btn-warning me-1"
+               th:href="@{'/admin/departments/edit/' + ${d.id}}">Düzenle</a>
+            <a class="btn btn-sm btn-danger"
+               onclick="return confirm('Bu departmanı silmek istediğinize emin misiniz?')"
+               th:href="@{'/admin/departments/delete/' + ${d.id}}">Sil</a>
+        </td>
+    </tr>
+    </tbody>
 </table>
 <a class="btn btn-secondary mt-3" href="/admin">← Geri Dön</a>
 </body>

@@ -45,20 +45,71 @@ public class DepartmentController {
 
     @PostMapping("/save")
     public String saveDepartment(@ModelAttribute("department") Department department,
-                                 @RequestParam("managerId") Long managerId) {
+                                 @RequestParam(value = "managerId", required = false) Long managerId) {
+
         if (managerId != null && managerId > 0) {
             User manager = userRepository.findById(managerId)
                     .orElseThrow(() -> new RuntimeException("Manager not found"));
+
+            // ✅ Prevent assigning the same manager to multiple departments
+            if (manager.getDepartment() != null &&
+                    !manager.getDepartment().getId().equals(department.getId())) {
+                return "redirect:/admin/departments?error=alreadyAssigned";
+            }
+
             department.setManager(manager);
-            manager.setDepartment(department); // optional
+            manager.setDepartment(department);
+        } else {
+            department.setManager(null);
         }
+
         departmentRepository.save(department);
         return "redirect:/admin/departments";
     }
 
     @GetMapping("/delete/{id}")
     public String deleteDepartment(@PathVariable("id") Long id) {
-        departmentRepository.deleteById(id);
+        Department department = departmentRepository.findById(id).orElse(null);
+        if (department != null) {
+            // Remove manager reference
+            if (department.getManager() != null) {
+                User manager = department.getManager();
+                manager.setDepartment(null); // also clear from manager
+                userRepository.save(manager);
+                department.setManager(null);
+            }
+
+            // Clear department reference from all employees
+            if (department.getEmployees() != null) {
+                department.getEmployees().forEach(e -> {
+                    e.setDepartment(null);
+                    if (e.getUser() != null) {
+                        User user = e.getUser();
+                        user.setDepartment(null);
+                        userRepository.save(user); // save the change
+                    }
+                });
+            }
+
+            departmentRepository.save(department); // persist nullified manager/employees
+            departmentRepository.delete(department); // now delete safely
+        }
         return "redirect:/admin/departments";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String editDepartment(@PathVariable("id") Long id, Model model) {
+        Department department = departmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Department not found"));
+
+        model.addAttribute("department", department);
+
+        List<User> managers = userRepository.findAll()
+                .stream()
+                .filter(u -> u.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_MANAGER")))
+                .toList();
+        model.addAttribute("managers", managers);
+
+        return "department-form";
     }
 }

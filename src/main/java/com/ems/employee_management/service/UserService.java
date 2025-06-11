@@ -116,6 +116,16 @@ public class UserService {
         }
     }
 
+    public void removeRole(Long userId, String roleName) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        roleRepository.findByName(roleName).ifPresent(role -> {
+            user.getRoles().remove(role);
+            userRepository.save(user);
+        });
+    }
+
     public void updateUserWithRoles(User user, List<Long> roleIds) {
         User existingUser = userRepository.findById(user.getId())
                 .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı."));

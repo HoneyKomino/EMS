@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -54,13 +55,25 @@ public class AdminController {
                              Model model) {
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("allRoles", roleRepository.findAll());
             return "edit-user";
         }
 
-        updatedUser.setId(id);
-        userService.updateUserWithRoles(updatedUser, updatedUser.getRoleIds()); // ✅ use roleIds from model
-        return "redirect:/admin/users?success"; // ✅ optional flag for notification
+        User existingUser = userService.findUserById(id);
+
+        // Update basic fields
+        existingUser.setSuperAdmin(updatedUser.isSuperAdmin());
+
+        if (updatedUser.isSuperAdmin()) {
+            // Ensure ROLE_ADMIN is assigned
+            userService.assignRole(id, "ROLE_ADMIN");
+        } else {
+            // Remove ROLE_ADMIN if it exists
+            userService.removeRole(id, "ROLE_ADMIN");
+        }
+
+        userService.updateUser(existingUser);
+
+        return "redirect:/admin/users?success";
     }
 
 
@@ -86,19 +99,27 @@ public class AdminController {
 
     @PostMapping("/make-manager/{id}")
     public String assignManagerToDepartment(@PathVariable Long id,
-                                            @RequestParam("departmentId") Long departmentId) {
+                                            @RequestParam("departmentId") Long departmentId,
+                                            RedirectAttributes redirectAttributes) {
         userService.assignRole(id, "ROLE_MANAGER");
 
         User manager = userService.findUserById(id);
         Department department = departmentRepository.findById(departmentId)
                 .orElseThrow(() -> new RuntimeException("Departman bulunamadı"));
 
+        // ✅ Check if department already has a manager
+        if (department.getManager() != null && !department.getManager().getId().equals(id)) {
+            redirectAttributes.addFlashAttribute("error", "Bu departmanda zaten bir yönetici var.");
+            return "redirect:/admin/users/make-manager/" + id;
+        }
+
         department.setManager(manager);
         departmentRepository.save(department);
 
-        manager.setDepartment(department); // optional if you want manager.getDepartment() to return this
+        manager.setDepartment(department);
         userService.updateUser(manager);
 
+        redirectAttributes.addFlashAttribute("success", "Yönetici başarıyla atandı.");
         return "redirect:/admin/users";
     }
 
