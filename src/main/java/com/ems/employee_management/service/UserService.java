@@ -3,7 +3,9 @@ package com.ems.employee_management.service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.ems.employee_management.model.Department;
 import com.ems.employee_management.model.Employee;
+import com.ems.employee_management.repository.DepartmentRepository;
 import com.ems.employee_management.repository.EmployeeRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,12 +24,14 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmployeeRepository employeeRepository;
+    private final DepartmentRepository departmentRepository;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, EmployeeRepository employeeRepository) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, EmployeeRepository employeeRepository, DepartmentRepository departmentRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.employeeRepository = employeeRepository;
+        this.departmentRepository = departmentRepository;
     }
 
     public User findByUsername(String username) {
@@ -47,13 +51,28 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
+    @Transactional
     public void deleteUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı."));
-        if (user.isSuperAdmin()) {
-            throw new RuntimeException("Ana admin silinemez.");
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // 1. Remove this user from employee if exists
+        Employee employee = employeeRepository.findByUser(user);
+        if (employee != null) {
+            employee.setUser(null);
+            employeeRepository.save(employee);
+            employeeRepository.delete(employee); // Optional: If you want to delete employee too
         }
-        userRepository.deleteById(id);
+
+        // 2. Remove manager from department if any
+        Department dept = departmentRepository.findByManager(user);
+        if (dept != null) {
+            dept.setManager(null);
+            departmentRepository.save(dept);
+        }
+
+        // 3. Now safe to delete user
+        userRepository.delete(user);
     }
 
     public void updateUser(User user) {

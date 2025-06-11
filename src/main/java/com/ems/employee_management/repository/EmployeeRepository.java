@@ -1,6 +1,8 @@
 package com.ems.employee_management.repository;
 
+import com.ems.employee_management.model.Department;
 import com.ems.employee_management.model.Employee;
+import com.ems.employee_management.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,4 +19,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     List<Employee> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrDepartment_DepartmentNameContainingIgnoreCase(
             String firstName, String lastName, String email, String departmentName);
+    Employee findByUser(User user);
+
+
 }

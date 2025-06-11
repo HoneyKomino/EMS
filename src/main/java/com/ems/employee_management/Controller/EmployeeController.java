@@ -95,9 +95,11 @@ public class EmployeeController {
             user.setConfirmPassword("default123");
             user.setDepartment(employee.getDepartment());
 
+            // ✅ Save the user first
             userService.registerUser(user);
             userService.assignRole(user.getId(), "ROLE_USER");
 
+            // ✅ Then set to employee
             employee.setUser(user);
         }
 
@@ -125,7 +127,13 @@ public class EmployeeController {
 
     @GetMapping("/delete/{id}")
     public String deleteEmployee(@PathVariable("id") Long id) {
-        employeeRepository.deleteById(id);
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Geçersiz çalışan ID: " + id));
+
+        // Disassociate user before delete
+        employee.setUser(null);
+
+        employeeRepository.delete(employee); // or deleteById after disassociation
         return "redirect:/admin/employees";
     }
 }
