@@ -14,4 +14,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     // Belirli bir departmana ait çalışanları bul
     List<Employee> findByDepartment_Id(Long departmentId);
+
+    List<Employee> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrDepartment_DepartmentNameContainingIgnoreCase(
+            String firstName, String lastName, String email, String departmentName);
 }

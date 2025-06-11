@@ -9,6 +9,14 @@
 <body class="container mt-4">
 <h2 class="mb-4">Çalışanlar</h2>
 <a class="btn btn-primary mb-3" href="/admin/employees/new">+ Yeni Çalışan</a>
+<form class="row mb-3" method="get" th:action="@{/admin/employees}">
+    <div class="col-auto">
+        <input type="text" class="form-control" name="keyword" th:value="${keyword}" placeholder="Ara...">
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-primary">Ara</button>
+    </div>
+</form>
 <table class="table table-bordered table-striped">
 <thead class="table-dark">
 <tr>

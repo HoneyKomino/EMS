@@ -37,9 +37,20 @@ public class EmployeeController {
     }
 
     @GetMapping
-    public String listEmployees(Model model) {
-        List<Employee> employees = employeeRepository.findAll();
+    public String listEmployees(@RequestParam(value = "keyword", required = false) String keyword,
+                                Model model) {
+        List<Employee> employees;
+
+        if (keyword != null && !keyword.isEmpty()) {
+            employees = employeeRepository
+                    .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrDepartment_DepartmentNameContainingIgnoreCase(
+                            keyword, keyword, keyword, keyword);
+        } else {
+            employees = employeeRepository.findAll();
+        }
+
         model.addAttribute("employees", employees);
+        model.addAttribute("keyword", keyword); // to preserve search term in view
         return "employee-list";
     }
 
