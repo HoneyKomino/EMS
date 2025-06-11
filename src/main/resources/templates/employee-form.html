@@ -23,13 +23,6 @@
 <input class="form-control" required="" th:field="*{email}" type="email"/>
 </div>
 <div class="col-md-6">
-<label class="form-label">Kullanıcı</label>
-<select class="form-select" required="" th:field="*{user}">
-<option value="">-- Seçiniz --</option>
-<option th:each="u : ${users}" th:selected="${u.id == employee.user?.id}" th:text="${u.username}" th:value="${u.id}"></option>
-</select>
-</div>
-<div class="col-md-6">
 <label class="form-label">Departman</label>
 <select class="form-select" th:field="*{department}">
 <option value="">-- Seçiniz --</option>

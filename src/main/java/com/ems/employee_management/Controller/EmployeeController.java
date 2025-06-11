@@ -1,11 +1,13 @@
 package com.ems.employee_management.controller;
 
 import com.ems.employee_management.model.Employee;
+import com.ems.employee_management.model.User;
 import com.ems.employee_management.repository.EmployeeRepository;
 import com.ems.employee_management.repository.UserRepository;
 import com.ems.employee_management.repository.DepartmentRepository;
 import com.ems.employee_management.repository.JobRepository;
 
+import com.ems.employee_management.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -20,15 +22,17 @@ public class EmployeeController {
     private final UserRepository userRepository;
     private final DepartmentRepository departmentRepository;
     private final JobRepository jobRepository;
+    private final UserService userService;
 
     public EmployeeController(EmployeeRepository employeeRepository,
                               UserRepository userRepository,
                               DepartmentRepository departmentRepository,
-                              JobRepository jobRepository) {
+                              JobRepository jobRepository, UserService userService) {
         this.employeeRepository = employeeRepository;
         this.userRepository = userRepository;
         this.departmentRepository = departmentRepository;
         this.jobRepository = jobRepository;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -49,6 +53,20 @@ public class EmployeeController {
 
     @PostMapping("/save")
     public String saveEmployee(@ModelAttribute("employee") Employee employee) {
+        if (employee.getUser() == null) {
+            User user = new User();
+            user.setUsername(employee.getFirstName()); // use email as username, or generate
+            user.setEmail(employee.getEmail());
+            user.setPassword("default123"); // default password (optionally random)
+            user.setConfirmPassword("default123");
+            user.setDepartment(employee.getDepartment());
+
+            userService.registerUser(user);
+            userService.assignRole(user.getId(), "ROLE_USER");
+
+            employee.setUser(user); // associate with the new user
+        }
+
         employeeRepository.save(employee);
         return "redirect:/admin/employees";
     }

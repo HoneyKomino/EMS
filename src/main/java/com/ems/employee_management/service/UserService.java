@@ -3,6 +3,8 @@ package com.ems.employee_management.service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.ems.employee_management.model.Employee;
+import com.ems.employee_management.repository.EmployeeRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,11 +21,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmployeeRepository employeeRepository;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, EmployeeRepository employeeRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.employeeRepository = employeeRepository;
     }
 
     public User findByUsername(String username) {
@@ -64,10 +68,9 @@ public class UserService {
         return userRepository.findByDepartmentId(manager.getDepartment().getId());
     }
 
-    // ✅ Yeni kullanıcı kaydı
     public void registerUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user); // ID oluşması için önce kaydedilir
+        userRepository.save(user); // Save to generate ID
 
         Set<Role> roleSet = new HashSet<>();
         if (user.isSuperAdmin()) {
@@ -81,7 +84,14 @@ public class UserService {
         }
 
         user.setRoles(roleSet);
-        userRepository.save(user); // rollerle tekrar kaydet
+        userRepository.save(user); // Save again with roles
+
+        // ✅ Auto-create Employee
+        Employee employee = new Employee();
+        employee.setUser(user);
+        employee.setEmail(user.getEmail()); // Set fields based on user
+        employee.setFirstName(user.getUsername()); // Or split name/email as needed
+        employeeRepository.save(employee);
     }
 
     @Transactional
