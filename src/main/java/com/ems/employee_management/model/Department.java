@@ -14,9 +14,9 @@ public class Department {
     @Column(nullable = false)
     private String departmentName;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "manager_id")
-    private Manager manager;
+    private User manager;
 
     @OneToMany(mappedBy = "department")
     private List<Employee> employees;
@@ -39,14 +39,13 @@ public class Department {
         this.departmentName = departmentName;
     }
 
-    public Manager getManager() {
+    public User getManager() {
         return manager;
     }
 
-    public void setManager(Manager manager) {
+    public void setManager(User manager) {
         this.manager = manager;
     }
-
     public List<Employee> getEmployees() {
         return employees;
     }

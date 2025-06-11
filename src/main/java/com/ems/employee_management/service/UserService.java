@@ -56,6 +56,10 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
+    public void updateUser(User user) {
+        userRepository.save(user);
+    }
+
     public Optional<User> findByEmailOptional(String email) {
         return userRepository.findByEmail(email);
     }

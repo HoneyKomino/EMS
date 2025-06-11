@@ -1,6 +1,8 @@
 package com.ems.employee_management.controller;
 
+import com.ems.employee_management.model.Department;
 import com.ems.employee_management.model.User;
+import com.ems.employee_management.repository.DepartmentRepository;
 import com.ems.employee_management.repository.RoleRepository;
 import com.ems.employee_management.service.UserService;
 import jakarta.validation.Valid;
@@ -19,10 +21,12 @@ public class AdminController {
 
     private final UserService userService;
     private final RoleRepository roleRepository;
+    private final DepartmentRepository departmentRepository;
 
-    public AdminController(UserService userService, RoleRepository roleRepository) {
+    public AdminController(UserService userService, RoleRepository roleRepository, DepartmentRepository departmentRepository) {
         this.userService = userService;
         this.roleRepository = roleRepository;
+        this.departmentRepository = departmentRepository;
     }
 
     @GetMapping
@@ -73,16 +77,31 @@ public class AdminController {
     }
 
     @GetMapping("/make-manager/{id}")
-    public String makeManager(@PathVariable Long id) {
-        System.out.println("▶▶  makeManager() reached for userId = " + id);
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("✅ Current user: " + auth.getName());
-        System.out.println("🔐 Roles: " + auth.getAuthorities());
+    public String showDepartmentAssignPage(@PathVariable Long id, Model model) {
+        User user = userService.findUserById(id);
+        model.addAttribute("user", user);
+        model.addAttribute("departments", departmentRepository.findAll());
+        return "assign-department-to-manager";
+    }
 
+    @PostMapping("/make-manager/{id}")
+    public String assignManagerToDepartment(@PathVariable Long id,
+                                            @RequestParam("departmentId") Long departmentId) {
         userService.assignRole(id, "ROLE_MANAGER");
+
+        User manager = userService.findUserById(id);
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new RuntimeException("Departman bulunamadı"));
+
+        department.setManager(manager);
+        departmentRepository.save(department);
+
+        manager.setDepartment(department); // optional if you want manager.getDepartment() to return this
+        userService.updateUser(manager);
 
         return "redirect:/admin/users";
     }
+
 
     @GetMapping("/create")
     public String showCreateUserForm(Model model) {
