@@ -77,7 +77,17 @@ public class DepartmentController {
             }
 
             department.setManager(manager);
-        } else {
+        } else {                           // managerId is null or 0  →  “Yok”
+            if (department.getId() != null) {
+                // find existing dept so we can detach its current manager
+                Department existing = departmentRepository.findById(department.getId())
+                        .orElse(null);
+                if (existing != null && existing.getManager() != null) {
+                    User oldMgr = existing.getManager();
+                    oldMgr.setDepartment(null);
+                    userRepository.save(oldMgr);
+                }
+            }
             department.setManager(null);
         }
 

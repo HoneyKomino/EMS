@@ -121,6 +121,11 @@ public class User {
         return department;
     }
 
+    public boolean hasRole(String name) {
+        if (roles == null) return false;
+        return roles.stream().anyMatch(r -> r.getName().equals(name));
+    }
+
     public void setDepartment(Department department) {
         this.department = department;
     }

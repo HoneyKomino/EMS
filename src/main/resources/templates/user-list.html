@@ -45,6 +45,16 @@
                        class="btn btn-sm btn-outline-primary">
                         Make&nbsp;Manager
                     </a>
+
+                    <form th:if="${user.hasRole('ROLE_MANAGER')}"
+                          th:action="@{'/admin/users/unmake-manager/' + ${user.id}}"
+                          method="post" class="d-inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Yönetici rolü kaldırılsın mı?')">
+                            Manager-Rolu-Kaldır
+                        </button>
+                    </form>
                 </td>
             </tr>
             </tbody>

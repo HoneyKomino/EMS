@@ -1,10 +1,13 @@
 package com.ems.employee_management.controller;
 
 import com.ems.employee_management.model.Department;
+import com.ems.employee_management.model.Employee;
 import com.ems.employee_management.model.User;
 import com.ems.employee_management.repository.DepartmentRepository;
+import com.ems.employee_management.repository.EmployeeRepository;
 import com.ems.employee_management.repository.RoleRepository;
 import com.ems.employee_management.service.UserService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,11 +26,13 @@ public class AdminController {
     private final UserService userService;
     private final RoleRepository roleRepository;
     private final DepartmentRepository departmentRepository;
+    private EmployeeRepository employeeRepository;
 
-    public AdminController(UserService userService, RoleRepository roleRepository, DepartmentRepository departmentRepository) {
+    public AdminController(UserService userService, RoleRepository roleRepository, DepartmentRepository departmentRepository, EmployeeRepository employeeRepository) {
         this.userService = userService;
         this.roleRepository = roleRepository;
         this.departmentRepository = departmentRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     @GetMapping
@@ -49,31 +54,62 @@ public class AdminController {
     }
 
     @PostMapping("/edit/{id}")
+    @Transactional
     public String updateUser(@PathVariable Long id,
-                             @Valid @ModelAttribute("user") User updatedUser,
-                             BindingResult bindingResult,
+                             @ModelAttribute("user") User formUser,   // ← NOT @Valid
+                             BindingResult binding,
+                             RedirectAttributes redirect,
                              Model model) {
 
-        if (bindingResult.hasErrors()) {
+        /* ─── 1. Load managed User ────────────────────────────────────────── */
+        User user = userService.findUserById(id);
+
+        /* ─── 2. Duplicate‑mail guard ─────────────────────────────────────── */
+        if (!formUser.getEmail().equals(user.getEmail())
+                && userService.existsByEmail(formUser.getEmail())) {
+            binding.rejectValue("email", "error.user", "Bu e‑posta zaten kullanımda.");
+        }
+
+        /* ─── 3. Optional password change ────────────────────────────────── */
+        if (formUser.getPassword() != null && !formUser.getPassword().isBlank()) {
+            if (formUser.getPassword().length() < 6) {          // simple rule
+                binding.rejectValue("password", "error.user",
+                        "Şifre en az 6 karakter olmalı.");
+            } else {
+                user.setPassword(userService.encode(formUser.getPassword())); // helper
+            }
+        }
+
+        /* ─── 4. Stop here on validation errors ───────────────────────────── */
+        if (binding.hasErrors()) {
+            model.addAttribute("allRoles", roleRepository.findAll());
             return "edit-user";
         }
 
-        User existingUser = userService.findUserById(id);
+        /* ─── 5. Copy other fields & roles ───────────────────────────────── */
+        user.setUsername  (formUser.getUsername());
+        user.setEmail     (formUser.getEmail());
+        user.setSuperAdmin(formUser.isSuperAdmin());
 
-        // Update basic fields
-        existingUser.setSuperAdmin(updatedUser.isSuperAdmin());
-
-        if (updatedUser.isSuperAdmin()) {
-            // Ensure ROLE_ADMIN is assigned
+        if (formUser.isSuperAdmin()) {
             userService.assignRole(id, "ROLE_ADMIN");
         } else {
-            // Remove ROLE_ADMIN if it exists
             userService.removeRole(id, "ROLE_ADMIN");
         }
 
-        userService.updateUser(existingUser);
+        userService.updateUser(user);
 
-        return "redirect:/admin/users?success";
+        /* ─── 6. Keep linked Employee in sync ─────────────────────────────── */
+        Employee emp = employeeRepository.findByUser(user);
+        if (emp != null) {
+            emp.setEmail(user.getEmail());
+            emp.setDepartment(user.getDepartment());
+            employeeRepository.save(emp);
+        }
+
+        /* ─── 7. Flash success & redirect back to the same edit page ─────── */
+        redirect.addFlashAttribute("success", "Kullanıcı başarıyla güncellendi.");
+        return "redirect:/admin/users/edit/" + id;
     }
 
 
@@ -113,6 +149,8 @@ public class AdminController {
             return "redirect:/admin/users/make-manager/" + id;
         }
 
+
+
         department.setManager(manager);
         departmentRepository.save(department);
 
@@ -123,6 +161,30 @@ public class AdminController {
         return "redirect:/admin/users";
     }
 
+    @PostMapping("/unmake-manager/{id}")
+    @Transactional
+    public String unmakeManager(@PathVariable Long id,
+                                RedirectAttributes redirect) {
+
+        User manager = userService.findUserById(id);
+
+        /* 1.  Detach from department (if any) */
+        Department dept = departmentRepository.findByManager(manager);
+        if (dept != null) {
+            dept.setManager(null);
+            departmentRepository.save(dept);
+        }
+        manager.setDepartment(null);
+
+        /* 2.  Remove ROLE_MANAGER */
+        userService.removeRole(id, "ROLE_MANAGER");
+
+        /* 3.  Persist user */
+        userService.updateUser(manager);
+
+        redirect.addFlashAttribute("success", "Yönetici rolü kaldırıldı.");
+        return "redirect:/admin/users";
+    }
 
     @GetMapping("/create")
     public String showCreateUserForm(Model model) {

@@ -104,6 +104,8 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
     }
 
+    public String encode(String raw) { return passwordEncoder.encode(raw); }
+
     public void registerUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
