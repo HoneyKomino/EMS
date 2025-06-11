@@ -25,7 +25,6 @@ public class User {
     private String password;
 
     @Transient
-    @NotBlank(message = "Şifre tekrarı boş olamaz")
     private String confirmPassword;
 
     @Email(message = "Geçerli bir e-posta adresi giriniz")
@@ -112,5 +111,17 @@ public class User {
 
     public void setDepartment(Department department) {
         this.department = department;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User user)) return false;
+        return id != null && id.equals(user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : System.identityHashCode(this);
     }
 }

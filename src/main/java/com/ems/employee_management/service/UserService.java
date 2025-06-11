@@ -3,6 +3,7 @@ package com.ems.employee_management.service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -83,13 +84,17 @@ public class UserService {
         userRepository.save(user); // rollerle tekrar kaydet
     }
 
+    @Transactional
     public void assignRole(Long userId, String roleName) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı."));
         Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new RuntimeException("Rol bulunamadı: " + roleName));
-        user.getRoles().add(role);
-        userRepository.save(user);
+
+        if (!user.getRoles().contains(role)) {     // 👈 skip if already present
+            user.getRoles().add(role);
+            userRepository.save(user);
+        }
     }
 
     public void updateUserWithRoles(User user, List<String> selectedRoleNames) {

@@ -19,10 +19,10 @@
 </thead>
 <tbody>
 <tr th:each="d : ${departments}">
-<td th:text="${d.departmentId}"></td>
+<td th:text="${d.id}"></td>
 <td th:text="${d.departmentName}"></td>
 <td>
-<a class="btn btn-sm btn-danger" onclick="return confirm('Bu departmanı silmek istediğinize emin misiniz?')" th:href="@{'/admin/departments/delete/' + ${d.departmentId}}">Sil</a>
+<a class="btn btn-sm btn-danger" onclick="return confirm('Bu departmanı silmek istediğinize emin misiniz?')" th:href="@{'/admin/departments/delete/' + ${d.id}}">Sil</a>
 </td>
 </tr>
 </tbody>
