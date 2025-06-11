@@ -54,7 +54,9 @@
         <div class="card-body">
           <i class="bi bi-cash-stack fs-1 text-success"></i>
           <p class="metric-value mt-3 mb-1"
-             th:text="${#numbers.formatDecimal(stats.avgSalary,1,'TR',2,',','.')}">
+             th:text="${stats.avgSalary != null ?
+            #numbers.formatDecimal(stats.avgSalary, 1, 'COMMA', 2, 'POINT') :
+            '—'}">
             0,00
           </p>
           <span class="text-muted">Ortalama Maaş (₺)</span>

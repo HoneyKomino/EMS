@@ -1,6 +1,7 @@
 package com.ems.employee_management.service;
 
 import com.ems.employee_management.model.Employee;
+import com.ems.employee_management.model.Job;
 import com.ems.employee_management.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
 
@@ -18,14 +19,24 @@ public class ReportService {
 
     public DepartmentStats stats(Long deptId) {
         List<Employee> emps = empRepo.findByDepartment_Id(deptId);
-        int count = emps.size();
-        BigDecimal total   = emps.stream()
-                .map(Employee::getSalary)
-                .filter(Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal avg = count > 0 ? total.divide(BigDecimal.valueOf(count), RoundingMode.HALF_UP)
-                : BigDecimal.ZERO;
-        return new DepartmentStats(count, avg);
+        int headcount = emps.size();
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (Employee e : emps) {
+            Job j = e.getJob();
+            if (j != null && j.getMinSalary() != null && j.getMaxSalary() != null) {
+                BigDecimal mid =
+                        BigDecimal.valueOf(j.getMinSalary())
+                                .add(BigDecimal.valueOf(j.getMaxSalary()))
+                                .divide(BigDecimal.valueOf(2));
+                total = total.add(mid);
+            }
+        }
+
+        BigDecimal avg = headcount > 0 ? total.divide(BigDecimal.valueOf(headcount), 2, RoundingMode.HALF_UP)
+                : null;
+
+        return new DepartmentStats(headcount, avg);
     }
 
     public record DepartmentStats(int headcount, BigDecimal avgSalary) {}
