@@ -1,51 +1,94 @@
+<!-- Employee List – refreshed look -->
 <!DOCTYPE html>
-
 <html lang="tr" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="utf-8"/>
-<title>Çalışan Listesi</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-<link rel="stylesheet" th:href="@{/style.css}"/></head>
-<body class="container mt-4">
-<h2 class="mb-4">Çalışanlar</h2>
-<a class="btn btn-primary mb-3" href="/admin/employees/new">+ Yeni Çalışan</a>
-<form class="row mb-3" method="get" th:action="@{/admin/employees}">
-    <div class="col-auto">
-        <input type="text" class="form-control" name="keyword" th:value="${keyword}" placeholder="Ara...">
+    <meta charset="utf-8"/>
+    <title>Çalışanlar</title>
+
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body { background:#f0f4f7; }
+        .card-hover:hover { box-shadow:0 0.5rem 1rem rgba(0,0,0,.15)!important; }
+        /* make the table the same rounded style as cards */
+        .table thead th { position:sticky; top:0; background:#fff; z-index:1; }
+        .table-responsive { max-height:70vh; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="/admin"><i class="bi bi-people-fill me-2"></i>Çalışanlar</a>
+        <a class="btn btn-sm btn-light d-lg-none" href="/admin"><i class="bi bi-house"></i></a>
     </div>
-    <div class="col-auto">
-        <button type="submit" class="btn btn-outline-primary">Ara</button>
+</nav>
+
+<div class="container py-5">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4 gap-2">
+        <a href="/admin/employees/new" class="btn btn-success"><i class="bi bi-plus-lg me-1"></i>Yeni Çalışan</a>
+
+        <!-- search -->
+        <form class="d-flex" th:action="@{/admin/employees}" method="get" role="search">
+            <input class="form-control me-2" type="search" name="keyword" placeholder="İsim, e‑posta veya departman…"
+                   aria-label="Ara" th:value="${keyword}">
+            <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i></button>
+        </form>
     </div>
-</form>
-<table class="table table-bordered table-striped">
-<thead class="table-dark">
-<tr>
-<th>ID</th>
-<th>Ad</th>
-<th>Soyad</th>
-<th>Email</th>
-<th>Kullanıcı Adı</th>
-<th>Departman</th>
-<th>Pozisyon</th>
-<th>İşlemler</th>
-</tr>
-</thead>
-<tbody>
-<tr th:each="emp : ${employees}">
-<td th:text="${emp.employeeId}"></td>
-<td th:text="${emp.firstName}"></td>
-<td th:text="${emp.lastName}"></td>
-<td th:text="${emp.email}"></td>
-<td th:text="${emp.user != null ? emp.user.username : 'Yok'}"></td>
-<td th:text="${emp.department != null ? emp.department.departmentName : 'Yok'}"></td>
-<td th:text="${emp.job != null ? emp.job.jobsTitle : 'Yok'}"></td>
-<td>
-<a class="btn btn-sm btn-warning me-1" th:href="@{'/admin/employees/edit/' + ${emp.employeeId}}">Düzenle</a>
-<a class="btn btn-sm btn-danger" onclick="return confirm('Bu çalışanı silmek istediğinize emin misiniz?')" th:href="@{'/admin/employees/delete/' + ${emp.employeeId}}">Sil</a>
-</td>
-</tr>
-</tbody>
-</table>
-<a class="btn btn-secondary mt-3" href="/admin">← Geri Dön</a>
+
+    <div class="card border-0 shadow-sm card-hover">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                    <tr class="text-nowrap">
+                        <th>#</th>
+                        <th>Ad Soyad</th>
+                        <th class="d-none d-md-table-cell">E‑posta</th>
+                        <th>Kullanıcı</th>
+                        <th>Departman</th>
+                        <th class="d-none d-lg-table-cell">Pozisyon</th>
+                        <th class="text-center">İşlemler</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="emp, stat : ${employees}">
+                        <td th:text="${stat.index+1}"></td>
+                        <td>
+                            <span th:text="${emp.firstName + ' ' + emp.lastName}"></span>
+                        </td>
+                        <td class="d-none d-md-table-cell" th:text="${emp.email}"></td>
+                        <td>
+                            <span th:if="${emp.user!=null}" class="badge bg-primary-subtle text-primary" th:text="${emp.user.username}"></span>
+                            <span th:unless="${emp.user!=null}" class="badge bg-secondary-subtle text-secondary">Yok</span>
+                        </td>
+                        <td th:text="${emp.department!=null ? emp.department.departmentName : 'Yok'}"></td>
+                        <td class="d-none d-lg-table-cell" th:text="${emp.job!=null ? emp.job.jobsTitle : 'Yok'}"></td>
+                        <td class="text-center">
+                            <a th:href="@{'/admin/employees/edit/' + ${emp.employeeId}}" class="btn btn-sm btn-warning me-1" title="Düzenle">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a th:href="@{'/admin/employees/delete/' + ${emp.employeeId}}"
+                               onclick="return confirm('Bu çalışanı silmek istediğinize emin misiniz?');"
+                               class="btn btn-sm btn-danger" title="Sil">
+                                <i class="bi bi-trash3"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${employees.size()} == 0">
+                        <td colspan="7" class="text-center text-muted py-4">Kayıt bulunamadı.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <a href="/admin" class="btn btn-link mt-4"><i class="bi bi-arrow-left"></i> Ana Panele Dön</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

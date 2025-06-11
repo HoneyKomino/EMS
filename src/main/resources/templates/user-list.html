@@ -1,66 +1,108 @@
+<!-- User List – refined UI matching other screens -->
 <!DOCTYPE html>
 <html lang="tr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Kullanıcı Listesi</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <link rel="stylesheet" th:href="@{/style.css}"/>
+    <title>Kullanıcılar</title>
+
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body { background:#f0f4f7; }
+        .card-hover:hover { box-shadow:0 0.5rem 1rem rgba(0,0,0,.15)!important; }
+        .table-responsive { max-height:70vh; }
+    </style>
 </head>
-<body class="bg-light vh-100">
-<div class="container py-5">
-    <div class="card shadow p-4">
-        <h2 class="mb-3">🔐 Kullanıcı Listesi</h2>
-        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
-            ✅ Kullanıcı başarıyla güncellendi!
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <a href="/admin/users/create" class="btn btn-primary mb-3">➕ Yeni Kullanıcı</a>
-        <table class="table table-bordered table-hover">
-            <thead class="table-light">
-            <tr>
-                <th>#</th>
-                <th>Kullanıcı Adı</th>
-                <th>E-posta</th>
-                <th>Roller</th>
-                <th>İşlemler</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="user, iterStat : ${users}">
-                <td th:text="${iterStat.index + 1}">1</td>
-                <td th:text="${user.username}">kullanici</td>
-                <td th:text="${user.email}">eposta@example.com</td>
-                <td>
-                    <span th:each="role : ${user.roles}" th:text="${role.name}" class="badge bg-secondary me-1">ROLE_USER</span>
-                </td>
-                <td>
-                    <a th:href="@{'/admin/users/edit/' + ${user.id}}" class="btn btn-sm btn-warning">✏️ Düzenle</a>
+<body>
 
-                    <form th:action="@{'/admin/users/delete/' + ${user.id}}" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Silmek istediğinize emin misiniz?')">🗑️ Sil</button>
-                    </form>
-
-                    <!-- ✅ Yeni: Manager Yap butonu -->
-                    <a th:href="@{'/admin/users/make-manager/' + ${user.id}}"
-                       class="btn btn-sm btn-outline-primary">
-                        Make&nbsp;Manager
-                    </a>
-
-                    <form th:if="${user.hasRole('ROLE_MANAGER')}"
-                          th:action="@{'/admin/users/unmake-manager/' + ${user.id}}"
-                          method="post" class="d-inline">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                        <button type="submit" class="btn btn-sm btn-outline-danger"
-                                onclick="return confirm('Yönetici rolü kaldırılsın mı?')">
-                            Manager-Rolu-Kaldır
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-        <a class="btn btn-secondary mt-3" href="/admin">← Geri</a>
+<!-- ▸▸ Navbar ------------------------------------------------------------ -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-danger shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="/admin">
+            <i class="bi bi-shield-lock-fill me-2"></i>Kullanıcılar
+        </a>
+        <a class="btn btn-sm btn-light d-lg-none" href="/admin"><i class="bi bi-house"></i></a>
     </div>
+</nav>
+
+<div class="container py-5">
+
+    <!-- success banner (after update) -->
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-check-circle-fill me-1"></i>Kullanıcı başarıyla güncellendi!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4 gap-2">
+        <a href="/admin/users/create" class="btn btn-success">
+            <i class="bi bi-plus-lg me-1"></i>Yeni Kullanıcı
+        </a>
+    </div>
+
+    <!-- table card -->
+    <div class="card border-0 shadow-sm card-hover">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Kullanıcı Adı</th>
+                        <th class="d-none d-md-table-cell">E‑posta</th>
+                        <th>Roller</th>
+                        <th class="text-center">İşlemler</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="user, stat : ${users}">
+                        <td th:text="${stat.index+1}"></td>
+                        <td th:text="${user.username}"></td>
+                        <td class="d-none d-md-table-cell" th:text="${user.email}"></td>
+                        <td>
+                            <span th:each="role : ${user.roles}" class="badge bg-secondary-subtle text-secondary me-1" th:text="${role.name}"></span>
+                        </td>
+                        <td class="text-center text-nowrap">
+                            <!-- Edit -->
+                            <a th:href="@{'/admin/users/edit/' + ${user.id}}" class="btn btn-sm btn-warning me-1" title="Düzenle">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <!-- Delete -->
+                            <form th:action="@{'/admin/users/delete/' + ${user.id}}" method="post" class="d-inline">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <button type="submit" class="btn btn-sm btn-danger me-1"
+                                        onclick="return confirm('Silmek istediğinize emin misiniz?');" title="Sil">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </form>
+                            <!-- Make‑manager / Remove‑manager -->
+                            <a th:if="${!user.hasRole('ROLE_MANAGER')}" th:href="@{'/admin/users/make-manager/' + ${user.id}}"
+                               class="btn btn-sm btn-outline-primary me-1" title="Yönetici Yap">
+                                <i class="bi bi-person-plus"></i>
+                            </a>
+                            <form th:if="${user.hasRole('ROLE_MANAGER')}" th:action="@{'/admin/users/unmake-manager/' + ${user.id}}"
+                                  method="post" class="d-inline">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Yönetici rolü kaldırılsın mı?');" title="Yönetici Rolünü Kaldır">
+                                    <i class="bi bi-person-dash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${users.size()} == 0">
+                        <td colspan="5" class="text-center text-muted py-4">Kayıt bulunamadı.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <a href="/admin" class="btn btn-link mt-4"><i class="bi bi-arrow-left"></i> Ana Panele Dön</a>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

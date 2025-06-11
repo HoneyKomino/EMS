@@ -3,28 +3,101 @@
 <head>
     <meta charset="utf-8"/>
     <title>Yönetici Paneli</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <link rel="stylesheet" th:href="@{/style.css}"/>
+
+    <!-- Bootstrap 5 + Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Optional: a tiny custom touch -->
+    <style>
+        body  { background: #f0f4f7; }
+        .card-hover:hover { box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15) !important; }
+        .logout-btn i { transition: transform .2s; }
+        .logout-btn:hover i { transform: translateX(-2px); }
+    </style>
 </head>
-<body class="bg-light vh-100">
-<div class="container py-5">
-    <div class="card shadow p-4">
-        <h2 class="mb-3">Yönetici Paneli</h2>
-        <p>Hoş geldin, <strong th:text="${#authentication.name}">Admin</strong>!</p>
+<body>
 
-        <div class="list-group">
-            <a class="list-group-item list-group-item-action" href="/admin/employees">👥 Çalışan Yönetimi</a>
-            <a class="list-group-item list-group-item-action" href="/admin/departments">🏢 Departmanlar</a>
-            <a class="list-group-item list-group-item-action" href="/admin/jobs">💼 Pozisyonlar</a>
-            <a class="list-group-item list-group-item-action" href="/admin/users">🔐 Kullanıcılar</a>
-        </div>
+<!-- ▸▸ Top bar ------------------------------------------------------------ -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="#">
+            <i class="bi bi-speedometer2 me-2"></i>Yönetici Paneli
+        </a>
 
-        <div class="mt-4 text-end">
-            <form th:action="@{/logout}" method="post" style="display:inline;">
-                <button type="submit" class="btn btn-danger">Çıkış Yap</button>
+        <div class="ms-auto d-flex align-items-center text-white">
+            Hoş geldin,&nbsp;
+            <strong class="me-3" th:text="${#authentication.name}">Admin</strong>
+
+            <form th:action="@{/logout}" method="post" class="m-0">
+                <button class="btn btn-sm btn-light logout-btn">
+                    <i class="bi bi-box-arrow-left me-1"></i>Çıkış
+                </button>
             </form>
         </div>
     </div>
+</nav>
+
+<!-- ▸▸ Content ------------------------------------------------------------ -->
+<div class="container py-5">
+
+    <!-- quick links as cards -->
+    <div class="row g-4">
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="/admin/employees" class="text-decoration-none">
+                <div class="card shadow-sm border-0 card-hover h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people-fill fs-1 text-primary"></i>
+                        <h6 class="mt-3 mb-0 fw-semibold">Çalışan Yönetimi</h6>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="/admin/departments" class="text-decoration-none">
+                <div class="card shadow-sm border-0 card-hover h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-building fs-1 text-success"></i>
+                        <h6 class="mt-3 mb-0 fw-semibold">Departmanlar</h6>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="/admin/jobs" class="text-decoration-none">
+                <div class="card shadow-sm border-0 card-hover h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-briefcase-fill fs-1 text-warning"></i>
+                        <h6 class="mt-3 mb-0 fw-semibold">Pozisyonlar</h6>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="/admin/users" class="text-decoration-none">
+                <div class="card shadow-sm border-0 card-hover h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-shield-lock-fill fs-1 text-danger"></i>
+                        <h6 class="mt-3 mb-0 fw-semibold">Kullanıcılar</h6>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- optional footer -->
+    <p class="text-center text-muted small mt-5">&copy;
+        <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2025</span> EMS • Tüm hakları saklıdır.
+    </p>
 </div>
+
+
+<!-- Bootstrap JS (just the bundle, for nav collapse) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
