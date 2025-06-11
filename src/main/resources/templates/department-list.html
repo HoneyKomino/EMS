@@ -8,10 +8,25 @@
 <link rel="stylesheet" th:href="@{/style.css}"/></head>
 <body class="container mt-4">
 <h2 class="mb-4">Departman Listesi</h2>
+
 <div th:if="${param.error == 'alreadyAssigned'}" class="alert alert-danger">
     Seçilen yönetici zaten başka bir departmana atanmış.
 </div>
+
+<form class="row mb-3" method="get" th:action="@{/admin/departments}">
+    <div class="col-md-6">
+        <input type="text" name="keyword" class="form-control"
+               placeholder="Departman adı veya yönetici"
+               th:value="${keyword}" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-primary">Ara</button>
+        <a class="btn btn-outline-secondary" href="/admin/departments">Temizle</a>
+    </div>
+</form>
+
 <a class="btn btn-primary mb-3" href="/admin/departments/new">+ Yeni Departman Ekle</a>
+
 <table class="table table-bordered table-striped">
     <thead class="table-dark">
     <tr>
@@ -34,8 +49,12 @@
                th:href="@{'/admin/departments/delete/' + ${d.id}}">Sil</a>
         </td>
     </tr>
+    <tr th:if="${departments.size()} == 0">
+        <td colspan="4" class="text-center text-muted">Sonuç bulunamadı.</td>
+    </tr>
     </tbody>
 </table>
+
 <a class="btn btn-secondary mt-3" href="/admin">← Geri Dön</a>
 </body>
 </html>

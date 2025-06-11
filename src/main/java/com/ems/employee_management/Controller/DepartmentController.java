@@ -8,6 +8,7 @@ import com.ems.employee_management.repository.UserRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -24,10 +25,21 @@ public class DepartmentController {
     }
 
     @GetMapping
-    public String listDepartments(Model model) {
-        model.addAttribute("departments", departmentRepository.findAll());
+    public String listDepartments(@RequestParam(value = "keyword", required = false) String keyword,
+                                  Model model) {
+        List<Department> departments;
+
+        if (keyword != null && !keyword.isEmpty()) {
+            departments = departmentRepository.findByDepartmentNameContainingIgnoreCaseOrManager_UsernameContainingIgnoreCase(keyword, keyword);
+        } else {
+            departments = departmentRepository.findAll();
+        }
+
+        model.addAttribute("departments", departments);
+        model.addAttribute("keyword", keyword);
         return "department-list";
     }
+
 
     @GetMapping("/new")
     public String showForm(Model model) {
@@ -45,25 +57,38 @@ public class DepartmentController {
 
     @PostMapping("/save")
     public String saveDepartment(@ModelAttribute("department") Department department,
-                                 @RequestParam(value = "managerId", required = false) Long managerId) {
+                                 @RequestParam(value = "managerId", required = false) Long managerId,
+                                 RedirectAttributes redirectAttributes) {
+
+        boolean isEdit = department.getId() != null;
 
         if (managerId != null && managerId > 0) {
             User manager = userRepository.findById(managerId)
                     .orElseThrow(() -> new RuntimeException("Manager not found"));
 
-            // ✅ Prevent assigning the same manager to multiple departments
-            if (manager.getDepartment() != null &&
-                    !manager.getDepartment().getId().equals(department.getId())) {
-                return "redirect:/admin/departments?error=alreadyAssigned";
+            Department assignedDept = manager.getDepartment();
+
+            // 🛑 Prevent assigning manager already managing another department (not this one)
+            if (assignedDept != null && (department.getId() == null || !assignedDept.getId().equals(department.getId()))) {
+                redirectAttributes.addFlashAttribute("error", "Seçilen yönetici zaten başka bir departmana atanmış.");
+                return isEdit
+                        ? "redirect:/admin/departments/edit/" + department.getId()
+                        : "redirect:/admin/departments/new";
             }
 
             department.setManager(manager);
-            manager.setDepartment(department);
         } else {
             department.setManager(null);
         }
 
         departmentRepository.save(department);
+
+        if (department.getManager() != null) {
+            User manager = department.getManager();
+            manager.setDepartment(department);
+            userRepository.save(manager);
+        }
+
         return "redirect:/admin/departments";
     }
 
@@ -71,28 +96,29 @@ public class DepartmentController {
     public String deleteDepartment(@PathVariable("id") Long id) {
         Department department = departmentRepository.findById(id).orElse(null);
         if (department != null) {
-            // Remove manager reference
+
+            // Unset manager
             if (department.getManager() != null) {
                 User manager = department.getManager();
-                manager.setDepartment(null); // also clear from manager
-                userRepository.save(manager);
+                manager.setDepartment(null);
                 department.setManager(null);
+                userRepository.save(manager);
             }
 
-            // Clear department reference from all employees
+            // Unset employees (if applicable)
             if (department.getEmployees() != null) {
-                department.getEmployees().forEach(e -> {
-                    e.setDepartment(null);
-                    if (e.getUser() != null) {
-                        User user = e.getUser();
-                        user.setDepartment(null);
-                        userRepository.save(user); // save the change
+                department.getEmployees().forEach(emp -> {
+                    if (emp.getUser() != null) {
+                        User empUser = emp.getUser();
+                        empUser.setDepartment(null);
+                        userRepository.save(empUser);
                     }
+                    emp.setDepartment(null);
                 });
             }
 
-            departmentRepository.save(department); // persist nullified manager/employees
-            departmentRepository.delete(department); // now delete safely
+            departmentRepository.save(department); // persist null references
+            departmentRepository.delete(department); // now safe to delete
         }
         return "redirect:/admin/departments";
     }

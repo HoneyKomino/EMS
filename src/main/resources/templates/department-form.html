@@ -8,7 +8,7 @@
 </head>
 <body class="container mt-4">
 <h2 class="mb-4" th:text="${department.id != null} ? 'Departman Düzenle' : 'Yeni Departman Ekle'">Departman</h2>
-
+<div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 <form class="row g-3" method="post" th:action="@{/admin/departments/save}" th:object="${department}">
 
     <input type="hidden" th:field="*{id}" />
