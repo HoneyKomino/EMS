@@ -20,7 +20,9 @@
         </div>
 
         <div class="mt-4 text-end">
-            <a class="btn btn-danger" href="/logout">Çıkış Yap</a>
+            <form th:action="@{/logout}" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-danger">Çıkış Yap</button>
+            </form>
         </div>
     </div>
 </div>
