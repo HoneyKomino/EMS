@@ -1,0 +1,78 @@
+<!-- Employee ▸ Yeni İzin İsteği -->
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>İzin İsteği Gönder</title>
+
+    <!-- Bootstrap 5 + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body { background:#f0f4f7; }
+        .card-hover:hover { box-shadow:0 0.5rem 1rem rgba(0,0,0,.12)!important; }
+    </style>
+</head>
+<body>
+
+<!-- ▸ Navbar ------------------------------------------------------------ -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-secondary shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="/employee">
+            <i class="bi bi-calendar-plus me-2"></i>Yeni İzin İsteği
+        </a>
+        <a class="btn btn-sm btn-light d-lg-none" href="/employee"><i class="bi bi-house"></i></a>
+    </div>
+</nav>
+
+<div class="container py-5">
+
+    <div class="card border-0 shadow-sm card-hover">
+        <div class="card-body">
+
+            <form th:action="@{/employee/timeoff/save}" th:object="${req}" method="post">
+
+                <div class="mb-3">
+                    <label class="form-label">Başlangıç Tarihi</label>
+                    <input type="date" class="form-control" th:field="*{start}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Bitiş Tarihi</label>
+                    <input type="date" class="form-control" th:field="*{end}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">İzin Türü</label>
+                    <select class="form-select" th:field="*{type}">
+                        <option th:value="${T(com.ems.employee_management.model.TimeOffRequest.Type).VACATION}">
+                            Yıllık İzin
+                        </option>
+                        <option th:value="${T(com.ems.employee_management.model.TimeOffRequest.Type).SICK}">
+                            Rapor
+                        </option>
+                        <option th:value="${T(com.ems.employee_management.model.TimeOffRequest.Type).UNPAID}">
+                            Ücretsiz İzin
+                        </option>
+                    </select>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="/employee" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Geri
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send"></i> Gönder
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

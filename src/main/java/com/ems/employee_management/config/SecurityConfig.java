@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/register", "/css/**", "/js/**").permitAll()
                         .requestMatchers("/admin/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/manager/**", "/manager/users/**").hasRole("MANAGER")  // 👈 EKLENDİ
+                        .requestMatchers("/employee/**").hasRole("USER")
                         .requestMatchers("/dashboard", "/user/**").authenticated()
                         .anyRequest().denyAll()
                 )
@@ -47,6 +48,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login")
                         .successHandler(roleBasedRedirectHandler())
                         .permitAll()
+                        .defaultSuccessUrl("/dashboard", true)
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")

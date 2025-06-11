@@ -16,4 +16,7 @@ public interface TimeOffRequestRepository
            order by r.status, r.startDate
            """)
     List<TimeOffRequest> findByDepartment(Long deptId);
+
+    List<TimeOffRequest>
+    findByEmployeeEmployeeIdOrderByStartDateDesc(Long empId);
 }

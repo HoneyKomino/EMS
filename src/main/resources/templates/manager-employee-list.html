@@ -16,24 +16,20 @@
 </head>
 <body>
 
-<!-- ▸ Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
   <div class="container">
     <a class="navbar-brand fw-semibold" href="/manager">
       <i class="bi bi-people-fill me-2"></i>Çalışanlarım
     </a>
-    <a class="btn btn-sm btn-light d-lg-none" href="/manager">
-      <i class="bi bi-house"></i>
-    </a>
+    <a class="btn btn-sm btn-light d-lg-none" href="/manager"><i class="bi bi-house"></i></a>
   </div>
 </nav>
 
 <div class="container py-5">
 
-  <!-- search + quick nav -->
+  <!-- search + nav -->
   <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-4">
 
-    <!-- search form -->
     <form class="d-flex" th:action="@{/manager}" method="get" role="search">
       <input class="form-control me-2" type="search" name="keyword"
              placeholder="İsim veya e‑posta…" th:value="${keyword}">
@@ -42,18 +38,17 @@
       </button>
     </form>
 
-    <!-- quick nav buttons -->
     <div class="btn-group mt-2 mt-sm-0">
-      <a href="/manager/timeoff" class="btn btn-warning">
+      <a href="/manager/timeoff"  class="btn btn-warning">
         <i class="bi bi-calendar-check"></i> İzin İstekleri
       </a>
-      <a href="/manager/reports" class="btn btn-info text-white">
+      <a href="/manager/reports"  class="btn btn-info text-white">
         <i class="bi bi-graph-up"></i> Raporlar
       </a>
     </div>
   </div>
 
-  <!-- employee list card -->
+  <!-- employee table -->
   <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
       <div class="table-responsive">
@@ -64,6 +59,7 @@
             <th>Ad Soyad</th>
             <th class="d-none d-md-table-cell">E‑posta</th>
             <th>Pozisyon</th>
+            <th class="text-center">İşlem</th>
           </tr>
           </thead>
           <tbody>
@@ -71,14 +67,26 @@
             <td th:text="${stat.index + 1}"></td>
             <td th:text="${emp.firstName + ' ' + emp.lastName}"></td>
             <td class="d-none d-md-table-cell" th:text="${emp.email}"></td>
+
+            <!-- pozisyon column -->
             <td>
+                            <span th:if="${emp.job != null}"
+                                  th:text="${emp.job.jobsTitle}"></span>
+              <span th:unless="${emp.job != null}" class="text-muted">—</span>
+            </td>
+
+            <!-- button column -->
+            <td class="text-center">
               <a th:href="@{|/manager/employees/${emp.employeeId}/edit-job|}"
-                 th:text="${emp.job != null ? emp.job.jobsTitle : 'Pozisyon Ata'}"></a>
+                 class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-pencil-square"></i>
+                <span th:text="${emp.job != null ? 'Değiştir' : 'Ata'}"></span>
+              </a>
             </td>
           </tr>
 
           <tr th:if="${employees.size()} == 0">
-            <td colspan="4" class="text-center text-muted py-5">
+            <td colspan="5" class="text-center text-muted py-5">
               Bu departmanda henüz çalışan yok.
             </td>
           </tr>
