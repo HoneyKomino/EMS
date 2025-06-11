@@ -18,10 +18,12 @@
 <label class="form-label">Soyad</label>
 <input class="form-control" required="" th:field="*{lastName}" type="text"/>
 </div>
-<div class="col-12">
-<label class="form-label">Email</label>
-<input class="form-control" required="" th:field="*{email}" type="email"/>
-</div>
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" th:field="*{email}">
+        <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+    </div>
+    <div th:if="${#fields.hasErrors('email')}" class="text-danger small" th:errors="*{email}"></div>
 <div class="col-md-6">
 <label class="form-label">Departman</label>
 <select class="form-select" th:field="*{department}">

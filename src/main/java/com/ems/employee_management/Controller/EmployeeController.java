@@ -10,6 +10,7 @@ import com.ems.employee_management.repository.JobRepository;
 import com.ems.employee_management.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,19 +53,48 @@ public class EmployeeController {
     }
 
     @PostMapping("/save")
-    public String saveEmployee(@ModelAttribute("employee") Employee employee) {
-        if (employee.getUser() == null) {
+    public String saveEmployee(@ModelAttribute("employee") Employee employee,
+                               BindingResult bindingResult,
+                               Model model) {
+
+        boolean isCreatingNew = (employee.getEmployeeId() == null);
+
+        // Check if email is already used by a *different* user
+        User existingUser = userService.findByEmailOptional(employee.getEmail()).orElse(null);
+        boolean isUsedByOtherUser = existingUser != null &&
+                (employee.getUser() == null || !existingUser.getId().equals(employee.getUser().getId()));
+
+        if (isUsedByOtherUser) {
+            bindingResult.rejectValue("email", "error.employee", "Bu e-posta zaten kullanımda.");
+        }
+
+        if (isCreatingNew && employee.getUser() == null && !bindingResult.hasErrors()) {
+            String baseUsername = employee.getFirstName().toLowerCase().replaceAll("\\s+", "");
+            String username = baseUsername;
+            int counter = 1;
+            while (userService.existsByUsername(username)) {
+                username = baseUsername + counter;
+                counter++;
+            }
+
             User user = new User();
-            user.setUsername(employee.getFirstName()); // use email as username, or generate
+            user.setUsername(username);
             user.setEmail(employee.getEmail());
-            user.setPassword("default123"); // default password (optionally random)
+            user.setPassword("default123");
             user.setConfirmPassword("default123");
             user.setDepartment(employee.getDepartment());
 
             userService.registerUser(user);
             userService.assignRole(user.getId(), "ROLE_USER");
 
-            employee.setUser(user); // associate with the new user
+            employee.setUser(user);
+        }
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("users", userRepository.findAll());
+            model.addAttribute("departments", departmentRepository.findAll());
+            model.addAttribute("jobs", jobRepository.findAll());
+            return "employee-form";
         }
 
         employeeRepository.save(employee);

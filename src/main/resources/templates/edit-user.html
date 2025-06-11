@@ -25,11 +25,11 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">Roller</label>
-                <select class="form-select" th:field="*{roles}" multiple>
+                <select class="form-select" th:field="*{roleIds}" multiple>
                     <option th:each="r : ${allRoles}"
                             th:value="${r.id}"
                             th:text="${r.name}"
-                            th:selected="${user.roles.contains(r)}"></option>
+                            th:selected="${#lists.contains(user.roles, r)}"></option>
                 </select>
             </div>
             <div class="form-check mb-3">

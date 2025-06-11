@@ -47,8 +47,6 @@ public class AdminController {
     public String updateUser(@PathVariable Long id,
                              @Valid @ModelAttribute("user") User updatedUser,
                              BindingResult bindingResult,
-                             @RequestParam(name = "superAdmin", required = false) boolean superAdmin,
-                             @RequestParam(name = "roles", required = false) List<String> selectedRoles,
                              Model model) {
 
         if (bindingResult.hasErrors()) {
@@ -57,10 +55,10 @@ public class AdminController {
         }
 
         updatedUser.setId(id);
-        updatedUser.setSuperAdmin(superAdmin);
-        userService.updateUserWithRoles(updatedUser, selectedRoles);
-        return "redirect:/admin/users";
+        userService.updateUserWithRoles(updatedUser, updatedUser.getRoleIds()); // ✅ use roleIds from model
+        return "redirect:/admin/users?success"; // ✅ optional flag for notification
     }
+
 
     @PostMapping("/delete/{id}")
     public String deleteUser(@PathVariable Long id) {
@@ -82,6 +80,7 @@ public class AdminController {
         System.out.println("🔐 Roles: " + auth.getAuthorities());
 
         userService.assignRole(id, "ROLE_MANAGER");
+
         return "redirect:/admin/users";
     }
 

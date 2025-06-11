@@ -10,6 +10,10 @@
 <div class="container py-5">
     <div class="card shadow p-4">
         <h2 class="mb-3">🔐 Kullanıcı Listesi</h2>
+        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            ✅ Kullanıcı başarıyla güncellendi!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         <a href="/admin/users/create" class="btn btn-primary mb-3">➕ Yeni Kullanıcı</a>
         <table class="table table-bordered table-hover">
             <thead class="table-light">

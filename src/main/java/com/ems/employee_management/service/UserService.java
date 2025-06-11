@@ -56,6 +56,10 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
+    public Optional<User> findByEmailOptional(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     public List<User> findAdmins() {
         return userRepository.findAllAdmins();
     }
@@ -68,9 +72,17 @@ public class UserService {
         return userRepository.findByDepartmentId(manager.getDepartment().getId());
     }
 
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+    }
+
     public void registerUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user); // Save to generate ID
 
         Set<Role> roleSet = new HashSet<>();
         if (user.isSuperAdmin()) {
@@ -85,13 +97,6 @@ public class UserService {
 
         user.setRoles(roleSet);
         userRepository.save(user); // Save again with roles
-
-        // ✅ Auto-create Employee
-        Employee employee = new Employee();
-        employee.setUser(user);
-        employee.setEmail(user.getEmail()); // Set fields based on user
-        employee.setFirstName(user.getUsername()); // Or split name/email as needed
-        employeeRepository.save(employee);
     }
 
     @Transactional
@@ -107,23 +112,29 @@ public class UserService {
         }
     }
 
-    public void updateUserWithRoles(User user, List<String> selectedRoleNames) {
+    public void updateUserWithRoles(User user, List<Long> roleIds) {
         User existingUser = userRepository.findById(user.getId())
                 .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı."));
 
+        // Password update
         if (user.getPassword() == null || user.getPassword().isBlank()) {
             user.setPassword(existingUser.getPassword());
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
 
-        Set<Role> updatedRoles = selectedRoleNames.stream()
-                .map(roleName -> roleRepository.findByName(roleName)
-                        .orElseThrow(() -> new RuntimeException("Rol bulunamadı: " + roleName)))
+        // Role update from IDs
+        Set<Role> roles = roleIds.stream()
+                .map(id -> roleRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Rol bulunamadı: " + id)))
                 .collect(Collectors.toSet());
 
-        user.setRoles(new HashSet<>(updatedRoles)); // 🔧 Hata burada da olabilir
-        user.setSuperAdmin(user.isSuperAdmin());
-        userRepository.save(user);
+        existingUser.setUsername(user.getUsername());
+        existingUser.setEmail(user.getEmail());
+        existingUser.setPassword(user.getPassword());
+        existingUser.setRoles(roles);
+        existingUser.setSuperAdmin(user.isSuperAdmin());
+
+        userRepository.save(existingUser);
     }
 }
