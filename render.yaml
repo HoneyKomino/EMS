@@ -4,7 +4,7 @@ services:
     env: java
     plan: free
     buildCommand: ./mvnw clean install
-    startCommand: java -jar target/*.jar
+    startCommand: java -jar target/ems-0.0.1-SNAPSHOT.jar
     envVars:
       - key: DB_URL
         value: jdbc:mysql://bjj0qg4bo8atiivbrjls-mysql.services.clever-cloud.com:3306/bjj0qg4bo8atiivbrjls?useSSL=false&serverTimezone=UTC
