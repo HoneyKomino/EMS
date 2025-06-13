@@ -47,13 +47,13 @@ public class Role {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Role role)) return false;
-        // if the entity has been persisted, compare by primary‑key
+
         return id != null && id.equals(role.id);
     }
 
     @Override
     public int hashCode() {
-        // heuristic recommended by Hibernate: use class hash until id assigned
+
         return id != null ? id.hashCode() : System.identityHashCode(this);
     }
 }

@@ -28,10 +28,9 @@ public class EmployeeSelfController {
     private final TimeOffService  timeOffService;
     private final UserService     userService;
 
-    /** Dashboard: job & salary + my requests */
     @GetMapping
     public String dashboard(@AuthenticationPrincipal UserDetails p,
-                            Model model) {                     // use Spring Model
+                            Model model) {
 
         Employee me = employeeService.findByUserId(
                 userService.findByUsername(p.getUsername()).getId());
@@ -44,7 +43,7 @@ public class EmployeeSelfController {
 
     /** show new‑request form */
     @GetMapping("/timeoff/new")
-    public String newForm(Model model) {                       // same here
+    public String newForm(Model model) {
         model.addAttribute("req", new TimeOffForm());
         return "employee-timeoff-form";
     }
@@ -61,7 +60,7 @@ public class EmployeeSelfController {
         timeOffService.createRequest(
                 me, req.getStart(), req.getEnd(), req.getType());
 
-        ra.addFlashAttribute("success", "İzin isteğiniz yöneticinize iletildi.");
+        ra.addFlashAttribute("success", "Success.");
         return "redirect:/employee";
     }
 }

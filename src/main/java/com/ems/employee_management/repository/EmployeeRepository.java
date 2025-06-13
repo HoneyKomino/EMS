@@ -14,9 +14,8 @@ import java.util.List;
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     // Belirli bir kullanıcıya ait çalışanı bul
-    Employee findByUser_Id(Long userId); // Daha doğru: `userId` yerine `user_Id`
+    Employee findByUser_Id(Long userId);
 
-    // Belirli bir departmana ait çalışanları bul
     List<Employee> findByDepartment_Id(Long departmentId);
 
     List<Employee> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrDepartment_DepartmentNameContainingIgnoreCase(

@@ -20,7 +20,7 @@ public class ViewController {
     @GetMapping("/login")
     public String loginPage(@RequestParam(value = "registered", defaultValue = "false") boolean registered,
                             Model model) {
-        System.out.println("🟢 Login sayfası çağrıldı. registered = " + registered);
+        System.out.println("🟢 Login. registered = " + registered);
 
         if (registered) {
             model.addAttribute("successMessage", "Kayıt başarılı! Giriş yapabilirsiniz.");

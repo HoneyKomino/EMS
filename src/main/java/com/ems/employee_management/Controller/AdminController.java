@@ -41,8 +41,8 @@ public class AdminController {
     @GetMapping
     public String listUsers(Model model) {
         model.addAttribute("users", userService.findAllUsers());
-        model.addAttribute("makeManagerUrlPrefix", "/admin/users/make-manager/"); // ✅ Add this
-        return "user-list"; // your HTML page name
+        model.addAttribute("makeManagerUrlPrefix", "/admin/users/make-manager/");
+        return "user-list"; // HTML page name
     }
 
     @GetMapping("/edit/{id}")
@@ -73,7 +73,7 @@ public class AdminController {
             binding.rejectValue("email", "error.user", "Bu e‑posta zaten kullanımda.");
         }
 
-        /* ─── 3. Optional password change ────────────────────────────────── */
+        /* ─── 3. password change ────────────────────────────────── */
         if (formUser.getPassword() != null && !formUser.getPassword().isBlank()) {
             if (formUser.getPassword().length() < 6) {          // simple rule
                 binding.rejectValue("password", "error.user",
@@ -146,7 +146,7 @@ public class AdminController {
         Department department = departmentRepository.findById(departmentId)
                 .orElseThrow(() -> new RuntimeException("Departman bulunamadı"));
 
-        // ✅ Check if department already has a manager
+        // Check if department already has a manager
         if (department.getManager() != null && !department.getManager().getId().equals(id)) {
             redirectAttributes.addFlashAttribute("error", "Bu departmanda zaten bir yönetici var.");
             return "redirect:/admin/users/make-manager/" + id;
@@ -202,8 +202,8 @@ public class AdminController {
     @GetMapping("/create")
     public String showCreateUserForm(Model model) {
         model.addAttribute("user", new User());
-        model.addAttribute("formAction", "/admin/users/create");  // 👈 change this depending on context
-        model.addAttribute("backUrl", "/admin/users");            // 👈 add this for the back button
+        model.addAttribute("formAction", "/admin/users/create");
+        model.addAttribute("backUrl", "/admin/users");
         return "create-user";
     }
 

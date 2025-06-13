@@ -18,6 +18,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = 'ROLE_ADMIN'")
     List<User> findAllAdmins();
 
-    // ✅ Yeni: Belirli departmana göre kullanıcıları getir
     List<User> findByDepartmentId(Long departmentId);
 }

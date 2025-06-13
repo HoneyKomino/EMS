@@ -71,7 +71,6 @@ public class UserService {
             departmentRepository.save(dept);
         }
 
-        // 3. Now safe to delete user
         userRepository.delete(user);
     }
 
@@ -131,7 +130,7 @@ public class UserService {
         Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new RuntimeException("Rol bulunamadı: " + roleName));
 
-        if (!user.getRoles().contains(role)) {     // 👈 skip if already present
+        if (!user.getRoles().contains(role)) {
             user.getRoles().add(role);
             userRepository.save(user);
         }

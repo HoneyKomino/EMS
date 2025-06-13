@@ -12,13 +12,12 @@ public interface EmployeeService {
 
     List<Employee> findEmployeesByDepartmentId(Long departmentId);
 
-    /* ▼▼ NEW — used by manager job‑assignment screen ▼▼ */
 
     Optional<Employee> findById(Long id);
 
-    List<Job> findAllJobs();          // list for the <select>
+    List<Job> findAllJobs();
 
-    void assignJob(Long empId, Long jobId);  // update employee.job
+    void assignJob(Long empId, Long jobId);
 
     List<Employee> findByDepartmentAndKeyword(Long deptId, String keyword);
 }

@@ -19,40 +19,34 @@ public class AuthController {
         this.userService = userService;
     }
 
-    // ✅ Kayıt formunu göstermek için GET endpoint'i
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
         model.addAttribute("user", new User());
         return "register";
     }
 
-    // ✅ Kayıt işlemini gerçekleştiren POST endpoint
     @PostMapping("/register")
     public String registerUser(@Valid @ModelAttribute("user") User user,
                                BindingResult bindingResult,
                                Model model) {
 
-        // 🔐 Şifre eşleşme kontrolü
         if (!user.getPassword().equals(user.getConfirmPassword())) {
-            bindingResult.reject("password.mismatch", "Şifreler uyuşmuyor");
+            bindingResult.reject("password.mismatch", "Passwords don't match");
         }
 
-        // 👤 Kullanıcı adı zaten var mı kontrolü
         if (!bindingResult.hasFieldErrors("username")) {
             if (userService.existsByUsername(user.getUsername())) {
-                bindingResult.rejectValue("username", null, "Bu kullanıcı adı zaten mevcut");
+                bindingResult.rejectValue("username", null, "This username is already in use");
             }
         }
 
-        // ❌ Validasyon hatası varsa form tekrar gösterilsin
         if (bindingResult.hasErrors()) {
-            bindingResult.getAllErrors().forEach(error -> System.out.println("⚠️ Hata: " + error));
+            bindingResult.getAllErrors().forEach(error -> System.out.println("⚠ Error: " + error));
             return "register";
         }
 
-        // ✅ Kullanıcıyı kaydet
         userService.registerUser(user);
-        System.out.println("✅ Kullanıcı kayıt edildi, login sayfasına yönlendiriliyor.");
+        System.out.println("User saved.");
 
         return "redirect:/login?registered=true";
     }

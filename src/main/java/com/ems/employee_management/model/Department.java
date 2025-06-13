@@ -9,7 +9,7 @@ public class Department {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // ✅ önce departmentId idi, şimdi id olarak düzeltildi
+    private Long id;
 
     @Column(nullable = false)
     private String departmentName;

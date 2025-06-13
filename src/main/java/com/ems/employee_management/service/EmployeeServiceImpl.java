@@ -23,12 +23,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee findByUserId(Long userId) {
-        return employeeRepository.findByUser_Id(userId); // ✅ Doğru metot
+        return employeeRepository.findByUser_Id(userId);
     }
 
     @Override
     public List<Employee> findEmployeesByDepartmentId(Long departmentId) {
-        return employeeRepository.findByDepartment_Id(departmentId); // ✅ Doğru metot
+        return employeeRepository.findByDepartment_Id(departmentId);
     }
 
     @Override
@@ -57,6 +57,6 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .orElseThrow(() -> new RuntimeException("Çalışan bulunamadı"));
         Job j = jobRepo.findById(jobId)
                 .orElseThrow(() -> new RuntimeException("Pozisyon bulunamadı"));
-        e.setJob(j);                  // JPA will persist on TX commit
+        e.setJob(j);
     }
 }

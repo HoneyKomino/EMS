@@ -68,7 +68,6 @@ public class DepartmentController {
 
             Department assignedDept = manager.getDepartment();
 
-            // 🛑 Prevent assigning manager already managing another department (not this one)
             if (assignedDept != null && (department.getId() == null || !assignedDept.getId().equals(department.getId()))) {
                 redirectAttributes.addFlashAttribute("error", "Seçilen yönetici zaten başka bir departmana atanmış.");
                 return isEdit
@@ -77,7 +76,7 @@ public class DepartmentController {
             }
 
             department.setManager(manager);
-        } else {                           // managerId is null or 0  →  “Yok”
+        } else {
             if (department.getId() != null) {
                 // find existing dept so we can detach its current manager
                 Department existing = departmentRepository.findById(department.getId())
@@ -127,8 +126,8 @@ public class DepartmentController {
                 });
             }
 
-            departmentRepository.save(department); // persist null references
-            departmentRepository.delete(department); // now safe to delete
+            departmentRepository.save(department);
+            departmentRepository.delete(department);
         }
         return "redirect:/admin/departments";
     }

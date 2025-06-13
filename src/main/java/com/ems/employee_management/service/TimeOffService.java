@@ -43,7 +43,6 @@ public class TimeOffService {
         repo.save(r);
     }
 
-    /** all requests of one employee (for “My Izinler” page) */
     public List<TimeOffRequest> myRequests(Long empId) {
         return repo.findByEmployeeEmployeeIdOrderByStartDateDesc(empId);
     }

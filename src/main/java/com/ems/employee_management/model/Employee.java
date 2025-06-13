@@ -37,7 +37,7 @@ public class Employee {
     private String lastName;
     private String email;
     @Column(precision = 10, scale = 2)
-    private BigDecimal salary;   // nullable ⇒ optional
+    private BigDecimal salary;   // nullable
 
     private LocalDate hireDate;  // for tenure chart later
 

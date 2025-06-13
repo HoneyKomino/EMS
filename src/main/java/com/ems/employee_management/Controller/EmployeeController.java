@@ -52,7 +52,7 @@ public class EmployeeController {
         }
 
         model.addAttribute("employees", employees);
-        model.addAttribute("keyword", keyword); // to preserve search term in view
+        model.addAttribute("keyword", keyword);
         return "employee-list";
     }
 
@@ -77,7 +77,7 @@ public class EmployeeController {
         Employee emp = creating
                 ? new Employee()
                 : employeeRepository.findById(form.getEmployeeId())
-                .orElseThrow(() -> new IllegalArgumentException("Çalışan bulunamadı"));
+                .orElseThrow(() -> new IllegalArgumentException("No emp found"));
 
         emp.setFirstName (form.getFirstName());
         emp.setLastName  (form.getLastName());
@@ -100,7 +100,7 @@ public class EmployeeController {
                                 !emailOwner.getId().equals(emp.getUser().getId()));
 
         if (mailOwnedByOther) {
-            binding.rejectValue("email", "error.employee", "Bu e‑posta zaten kullanımda.");
+            binding.rejectValue("email", "error.employee", "This employee already exists.");
         }
 
         /* 4 – Create a brand‑new user when adding a NEW employee */
@@ -133,9 +133,8 @@ public class EmployeeController {
             u.setEmail(emp.getEmail());
             u.setDepartment(emp.getDepartment());
 
-            /* ▼▼  CHANGED block — use equals(...) instead of startsWith(...) ▼▼ */
             String desiredBase = emp.getFirstName().toLowerCase().replaceAll("\\s+", "");
-            if (!u.getUsername().equals(desiredBase)) {           // <— changed line
+            if (!u.getUsername().equals(desiredBase)) {
                 String cand = desiredBase;
                 int i = 1;
                 while (userService.existsByUsername(cand) &&
@@ -145,7 +144,7 @@ public class EmployeeController {
                 u.setUsername(cand);
             }
 
-            userService.updateUser(u);                     // flush user changes
+            userService.updateUser(u);
         }
 
         /* 6 – Redisplay form on validation errors */
@@ -156,18 +155,13 @@ public class EmployeeController {
             return "employee-form";
         }
 
-        /* 7 – Persist Employee (and linked User) */
         employeeRepository.save(emp);
         return "redirect:/admin/employees";
     }
 
 
-    /* ------------------------------------------------------------
-     * Helper – one place to decide which Employee fields
-     *          you want reflected on the linked User
-     * ------------------------------------------------------------ */
     private void syncUserFromEmployee(Employee e) {
-        User u = e.getUser();                       // managed entity
+        User u = e.getUser();
         u.setEmail(e.getEmail());
         u.setDepartment(e.getDepartment());
 
@@ -187,7 +181,7 @@ public class EmployeeController {
     @GetMapping("/edit/{id}")
     public String editEmployee(@PathVariable("id") Long id, Model model) {
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Geçersiz çalışan ID: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid ID: " + id));
         model.addAttribute("employee", employee);
         model.addAttribute("users", userRepository.findAll());
         model.addAttribute("departments", departmentRepository.findAll());
@@ -198,7 +192,7 @@ public class EmployeeController {
     @GetMapping("/delete/{id}")
     public String deleteEmployee(@PathVariable("id") Long id) {
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Geçersiz çalışan ID: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid ID: " + id));
 
         User user = employee.getUser();
 

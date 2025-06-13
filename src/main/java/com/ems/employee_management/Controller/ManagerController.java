@@ -35,19 +35,6 @@ public class ManagerController {
         this.userService = userService;
     }
 
-//    // 🟡 Dashboard → kendi departmanındaki çalışanları göster
-//    // Dashboard – employees in my department
-//    @GetMapping
-//    public String viewMyDepartmentEmployees(@AuthenticationPrincipal UserDetails principal,
-//                                            Model model) {
-//        User me = userService.findByUsername(principal.getUsername());
-//        Long deptId = managerService.getDepartmentIdByUser(me);
-//        List<Employee> emps = employeeService.findEmployeesByDepartmentId(deptId);
-//        model.addAttribute("employees", emps);
-//        return "manager-employee-list";   // <── NEW TEMPLATE NAME
-//    }
-
-    /** 📋 Çalışanlarım (view‑only) */
     @GetMapping
     public String employees(@AuthenticationPrincipal UserDetails p,
                             @RequestParam(required = false) String keyword,
@@ -58,11 +45,10 @@ public class ManagerController {
 
         m.addAttribute("employees",
                 employeeService.findByDepartmentAndKeyword(deptId, keyword));
-        m.addAttribute("keyword", keyword);      // keep value in the search box
+        m.addAttribute("keyword", keyword);
         return "manager-employee-list";
     }
 
-    /** 📅 İzin İstekleri */
     @GetMapping("/timeoff")
     public String timeOff(@AuthenticationPrincipal UserDetails p, Model m) {
         Long deptId = managerService.getDepartmentIdByUser(
@@ -82,7 +68,6 @@ public class ManagerController {
         return "redirect:/manager/timeoff";
     }
 
-    /** 📊 Raporlar */
     @GetMapping("/reports")
     public String reports(@AuthenticationPrincipal UserDetails p, Model m) {
         Long deptId = managerService.getDepartmentIdByUser(
@@ -101,7 +86,6 @@ public class ManagerController {
         Employee emp = employeeService.findById(empId)
                 .orElseThrow(() -> new RuntimeException("Çalışan bulunamadı"));
 
-        // güvenlik: başka departmana ait ise engelle
         if (!emp.getDepartment().getId().equals(deptId)) {
             return "redirect:/manager";
         }
@@ -126,7 +110,7 @@ public class ManagerController {
             return "redirect:/manager";
         }
 
-        employeeService.assignJob(empId, jobId);  // simple update
+        employeeService.assignJob(empId, jobId);
         ra.addFlashAttribute("success", "Pozisyon güncellendi.");
         return "redirect:/manager";
     }

@@ -13,9 +13,7 @@ public interface ManagerRepository extends JpaRepository<Manager, Long> {
     @Query("SELECT m.department.id FROM Manager m WHERE m.employee.user.id = :userId")
     Long findDepartmentIdByUserId(@Param("userId") Long userId);
 
-    // NEW: find by employee
     Manager findByEmployee(Employee employee);
 
-    // NEW: delete by employee
     void deleteByEmployee(Employee employee);
 }
