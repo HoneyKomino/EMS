@@ -3,7 +3,7 @@
 <html lang="tr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8"/>
-    <title>Çalışan Paneli</title>
+    <title>Employee Panel</title>
 
     <!-- Bootstrap 5 + Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -44,11 +44,11 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-secondary shadow-sm">
     <div class="container">
         <span class="navbar-brand fw-semibold">
-            <i class="bi bi-person-circle me-2"></i>Çalışan Paneli
+            <i class="bi bi-person-circle me-2"></i>Employee Panel
         </span>
         <form th:action="@{/logout}" method="post" class="ms-auto m-0">
             <button class="btn btn-sm btn-light">
-                <i class="bi bi-box-arrow-right"></i> Çıkış
+                <i class="bi bi-box-arrow-right"></i> Logout
             </button>
         </form>
     </div>
@@ -66,23 +66,21 @@
     <div class="card border-0 shadow-sm card-hover mb-4">
         <div class="card-body">
             <h4 class="mb-3">
-                Merhaba,
+                Hi,
                 <span th:text="${me.firstName + ' ' + me.lastName}">Ali Yılmaz</span>
             </h4>
 
             <p class="mb-1">
-                <strong>Pozisyon:</strong>
-                <span th:text="${me.job != null ? me.job.jobsTitle : '—'}">Yazılım Mühendisi</span>
+                <strong>Job:</strong>
+                <span th:text="${me.job != null ? me.job.jobsTitle : '—'}">Software Engineer</span>
             </p>
 
             <p class="mb-0">
-                <strong>Maaş:</strong>
+                <strong>Salary:</strong>
 
-                <!-- 1) explicit salary -->
                 <span th:if="${me.salary != null}"
                       th:text="${#numbers.formatDecimal(me.salary, 1, 'COMMA', 2, 'POINT')}"></span>
 
-                <!-- 2) range from job -->
                 <span th:if="${me.salary == null
              and me.job != null
              and me.job.minSalary != null
@@ -92,7 +90,6 @@
           #numbers.formatDecimal(me.job.maxSalary, 1, 'COMMA', 2, 'POINT'))}">
                 </span>
 
-                <!-- 3) nothing -->
                 <span th:if="${me.salary == null
                              and (me.job == null
                                   or me.job.minSalary == null
@@ -103,13 +100,13 @@
 
     <!-- new request -->
     <a href="/employee/timeoff/new" class="btn btn-primary mb-3">
-        <i class="bi bi-calendar-plus"></i> İzin İsteği Gönder
+        <i class="bi bi-calendar-plus"></i> Send Leave Request
     </a>
 
     <!-- my requests -->
     <div class="card border-0 shadow-sm card-hover">
         <div class="card-header bg-light">
-            <h6 class="mb-0"><i class="bi bi-clock-history me-1"></i>İzin İsteklerim</h6>
+            <h6 class="mb-0"><i class="bi bi-clock-history me-1"></i>My requests</h6>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -117,10 +114,10 @@
                     <thead class="table-light">
                     <tr>
                         <th>#</th>
-                        <th>Başlangıç</th>
-                        <th>Bitiş</th>
-                        <th>Tür</th>
-                        <th>Durum</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Type</th>
+                        <th>Status</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -137,7 +134,7 @@
 
                     <tr th:if="${myRequests.size()} == 0">
                         <td colspan="5" class="text-center text-muted py-4">
-                            Henüz izin isteğiniz yok.
+                            You have no permission requests yet.
                         </td>
                     </tr>
                     </tbody>

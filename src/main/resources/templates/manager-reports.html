@@ -3,7 +3,7 @@
 <html lang="tr" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="utf-8"/>
-  <title>Departman Raporları</title>
+  <title>Department Reports</title>
 
   <!-- Bootstrap 5 + Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -21,7 +21,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-info shadow-sm">
   <div class="container">
     <a class="navbar-brand fw-semibold" href="/manager">
-      <i class="bi bi-graph-up me-2"></i>Raporlar
+      <i class="bi bi-graph-up me-2"></i>Reports
     </a>
     <a class="btn btn-sm btn-light d-lg-none" href="/manager"><i class="bi bi-house"></i></a>
   </div>
@@ -31,7 +31,7 @@
 
   <!-- back & nav -->
   <div class="mb-4">
-    <a href="/manager" class="btn btn-link"><i class="bi bi-arrow-left"></i> Çalışanlara Dön</a>
+    <a href="/manager" class="btn btn-link"><i class="bi bi-arrow-left"></i> Backto Employees</a>
   </div>
 
   <!-- metrics grid -->
@@ -43,7 +43,7 @@
         <div class="card-body">
           <i class="bi bi-people-fill fs-1 text-primary"></i>
           <p class="metric-value mt-3 mb-1" th:text="${stats.headcount}">0</p>
-          <span class="text-muted">Toplam Çalışan</span>
+          <span class="text-muted">Total Employees</span>
         </div>
       </div>
     </div>
@@ -59,7 +59,7 @@
             '—'}">
             0,00
           </p>
-          <span class="text-muted">Ortalama Maaş (₺)</span>
+          <span class="text-muted">Avg. Salary (₺)</span>
         </div>
       </div>
     </div>
@@ -68,13 +68,13 @@
 
   <!-- quick nav footer -->
   <div class="btn-group mt-5">
-    <a href="/manager/timeoff"  class="btn btn-warning"><i class="bi bi-calendar-check"></i> İzin İstekleri</a>
-    <a href="/manager"          class="btn btn-primary"><i class="bi bi-people-fill"></i> Çalışanlarım</a>
+    <a href="/manager/timeoff"  class="btn btn-warning"><i class="bi bi-calendar-check"></i> Leave Requests</a>
+    <a href="/manager"          class="btn btn-primary"><i class="bi bi-people-fill"></i> My Employees</a>
   </div>
 
   <!-- logout -->
   <form th:action="@{/logout}" method="post" class="d-inline ms-2">
-    <button class="btn btn-danger"><i class="bi bi-box-arrow-right"></i> Çıkış Yap</button>
+    <button class="btn btn-danger"><i class="bi bi-box-arrow-right"></i> EXIT</button>
   </form>
 
 </div>

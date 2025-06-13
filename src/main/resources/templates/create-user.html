@@ -2,25 +2,23 @@
 <html lang="tr" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Yeni Kullanıcı Oluştur</title>
+  <title>Create new user</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" th:href="@{/style.css}">
 </head>
 <body class="bg-light vh-100">
 <div class="container py-5">
   <div class="card shadow p-4">
-    <h2 class="mb-4">➕ Yeni Kullanıcı Oluştur</h2>
+    <h2 class="mb-4">➕ Create New User</h2>
 
-    <!-- ✅ Dinamik olarak admin veya manager create endpoint'ine yönlendir -->
     <form th:action="@{${formAction}}" th:object="${user}" method="post">
 
-      <!-- ✅ Hataları göster -->
       <div th:if="${#fields.hasErrors()}" class="alert alert-danger">
         Lütfen formdaki hataları düzeltin.
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Kullanıcı Adı</label>
+        <label class="form-label">Username</label>
         <input type="text" class="form-control" th:field="*{username}" required>
         <div class="text-danger" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
       </div>
@@ -38,31 +36,29 @@
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Şifre Tekrar</label>
+        <label class="form-label">Password again</label>
         <input type="password" class="form-control" th:field="*{confirmPassword}" required>
         <div class="text-danger" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
       </div>
 
-      <!-- ✅ Rol seçimi -->
+      <!-- Role -->
       <div class="mb-3">
-        <label class="form-label">Rol</label>
+        <label class="form-label">Role</label>
         <select class="form-select" name="role" required>
-          <option value="ROLE_USER">Çalışan</option>
-          <!-- ✅ Sadece adminler manager rolünü atayabilir -->
-          <option th:if="${#authorization.expression('hasRole(''ADMIN'')')}" value="ROLE_MANAGER">Departman Yöneticisi</option>
+          <option value="ROLE_USER">Employee</option>
+          <!-- only admins can assign manager -->
+          <option th:if="${#authorization.expression('hasRole(''ADMIN'')')}" value="ROLE_MANAGER">Manager</option>
         </select>
       </div>
 
-      <!-- ✅ Sadece super adminler checkbox görebilir -->
       <div class="form-check mb-3" th:if="${#authorization.expression('principal.superAdmin')}">
         <input class="form-check-input" type="checkbox" name="superAdmin">
-        <label class="form-check-label">Bu kullanıcı Süper Admin olsun</label>
+        <label class="form-check-label">Make superadmin</label>
       </div>
 
-      <!-- ✅ Dinamik geri dön butonu -->
       <div class="d-flex justify-content-between">
-        <a th:href="@{${backUrl}}" class="btn btn-secondary">← Geri</a>
-        <button type="submit" class="btn btn-primary">Oluştur</button>
+        <a th:href="@{${backUrl}}" class="btn btn-secondary">← Back</a>
+        <button type="submit" class="btn btn-primary">Create</button>
       </div>
     </form>
   </div>
