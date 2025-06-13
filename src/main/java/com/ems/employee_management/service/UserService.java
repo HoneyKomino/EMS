@@ -61,7 +61,7 @@ public class UserService {
         if (employee != null) {
             employee.setUser(null);
             employeeRepository.save(employee);
-            employeeRepository.delete(employee); // Optional: If you want to delete employee too
+            employeeRepository.delete(employee);
         }
 
         // 2. Remove manager from department if any
