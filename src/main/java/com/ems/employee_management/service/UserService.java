@@ -120,7 +120,7 @@ public class UserService {
         }
 
         user.setRoles(roleSet);
-        userRepository.save(user); // Save again with roles
+        userRepository.save(user);
     }
 
     @Transactional
