@@ -1,22 +1,12 @@
-FROM openjdk:17-jdk-slim
-
+# Stage 1: Build the JAR
+FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
-# Copy your app JAR
-COPY employee-management-0.0.1-SNAPSHOT.jar app.jar
-
-# Copy the PEM certificate
-COPY ca.pem /app/ca.pem
-
-# Convert PEM to JKS truststore
-RUN keytool -importcert \
-    -alias aivenmysql \
-    -file /app/ca.pem \
-    -keystore /app/aiven.jks \
-    -storepass changeit \
-    -noprompt
-
+# Stage 2: Run the JAR
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY --from=build /app/target/employee-management-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
-
-# Set trust store properties and run your app
-ENTRYPOINT ["java", "-Djavax.net.ssl.trustStore=/app/aiven.jks", "-Djavax.net.ssl.trustStorePassword=changeit", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
